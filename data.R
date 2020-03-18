@@ -104,7 +104,9 @@ histology$ID <- gsub('\\.','-', histology$ID)
 
 dataset <- inner_join(histology, dataset, by = "ID")
 
-dataset[1:5,1:5]
+dataset <- dataset %>%
+  filter(HISTOLOGICAL_DIAGNOSIS == "Infiltrating Ductal Carcinoma" |
+           HISTOLOGICAL_DIAGNOSIS == "Infiltrating Lobular Carcinoma")
 
 ductalSet <- dataset %>%
   filter(HISTOLOGICAL_DIAGNOSIS == "Infiltrating Ductal Carcinoma") %>%

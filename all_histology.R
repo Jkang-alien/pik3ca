@@ -6,7 +6,7 @@ library(tidyverse)
 library(ggplot2)
 library(tidymodels)
 
-init_split <- initial_split(dataset, strata = HISTOLOGICAL_DIAGNOSIS)
+init_split <- initial_split(dataset, strata = PIK3CA_T)
 trainset_ah <- training(init_split)
 testset_ah <- testing(init_split)
   
@@ -20,14 +20,14 @@ summary(variance[variance > median(variance)])
 
 trainset_ahLargeVariance <- trainset_ah[,-1:-3][,variance > median(variance)]
 trainset_ahLargeVariance$PIK3CA_T <- trainset_ah$PIK3CA_T
-trainset_ahLargeVariance$HISTOLOGICAL_DIAGNOSIS <- trainset_ah$HISTOLOGICAL_DIAGNOSIS
+#trainset_ahLargeVariance$HISTOLOGICAL_DIAGNOSIS <- trainset_ah$HISTOLOGICAL_DIAGNOSIS
 
 testset_ahLargeVariance <- testset_ah[,-1:-3][,variance > median(variance)]
 testset_ahLargeVariance$PIK3CA_T <- testset_ah$PIK3CA_T
 testset_ahLargeVariance$HISTOLOGICAL_DIAGNOSIS <- testset_ah$HISTOLOGICAL_DIAGNOSIS
 
-stasticsWilcox <- vector(mode = "list", length = dim(trainset_ahLargeVariance)[2])
-pvalueWilcox <- vector(mode = "list", length = dim(trainset_ahLargeVariance)[2])
+stasticsWilcox <- vector(mode = "list", length = dim(trainset_ahLargeVariance)[2]-1)
+pvalueWilcox <- vector(mode = "list", length = dim(trainset_ahLargeVariance)[2]-1)
 
 for (i in 1:(dim(trainset_ahLargeVariance)[2]-1)) {
   a <- wilcox.test(trainset_ahLargeVariance[,i] ~ trainset_ahLargeVariance$PIK3CA_T)
@@ -39,7 +39,7 @@ colnames(trainset_ahLargeVariance)[log(unlist(pvalueWilcox), base = 10) < -8]
 
 trainset_ahDiff <- trainset_ahLargeVariance[,log(unlist(pvalueWilcox), base = 10) < -8]
 
-trainset_ahDiff$PIK3CA_T<- trainset_ah$PIK3CA_T
+trainset_ahDiff$PIK3CA_T <- trainset_ah$PIK3CA_T
 
 trainset_ahDiff$HISTOLOGICAL_DIAGNOSIS <- trainset_ah$HISTOLOGICAL_DIAGNOSIS
 
@@ -49,13 +49,13 @@ testset_ahDiff$PIK3CA_T<- testset_ah$PIK3CA_T
 testset_ahDiff$HISTOLOGICAL_DIAGNOSIS <- testset_ah$HISTOLOGICAL_DIAGNOSIS
 
 testset_lobular <- testset_ahDiff %>%
-  filter(HISTOLOGICAL_DIAGNOSIS == "Infiltrating Lobular Carcinoma") %>%
-  select(-HISTOLOGICAL_DIAGNOSIS)
+  filter(HISTOLOGICAL_DIAGNOSIS == "Infiltrating Lobular Carcinoma")# %>%
+  #select(-HISTOLOGICAL_DIAGNOSIS)
 
 
 testset_ductal <- testset_ahDiff %>%
-  filter(HISTOLOGICAL_DIAGNOSIS == "Infiltrating Ductal Carcinoma") %>%
-  select(-HISTOLOGICAL_DIAGNOSIS)
+  filter(HISTOLOGICAL_DIAGNOSIS == "Infiltrating Ductal Carcinoma")# %>%
+  #select(-HISTOLOGICAL_DIAGNOSIS)
 
   
 summary(trainset_ah$PIK3CA_T)
@@ -86,10 +86,10 @@ mod <- logistic_reg(penalty = tune(),
   set_engine("glmnet")
 
 rec <- recipe(PIK3CA_T ~ ., data = trainset_ahDiff) %>%
-  step_BoxCox(all_predictors()) %>%
+  step_BoxCox(all_numeric()) %>%
   step_dummy(HISTOLOGICAL_DIAGNOSIS) %>%
-  step_center(all_predictors()) %>%
-  step_scale(all_predictors()) %>%
+  step_center(all_numeric()) %>%
+  step_scale(all_numeric()) %>%
   step_downsample(PIK3CA_T)
 
 wfl <- 
@@ -117,9 +117,7 @@ glmn_tune <-
 
 show_best(glmn_tune)
 
-lasso_glmn <- show_best(glmn_tune)[4,1:2]
 best_glmn <- select_best(glmn_tune)
-mix <- show_best(glmn_tune)[3,1:2]
 
 ## @knitr Finalize_model
 
@@ -128,8 +126,15 @@ wfl_final <-
   finalize_workflow(best_glmn) %>%
   fit(data = trainset_ahDiff)
 
-## @knitr trainset_prediction
+model <- extract_model(wfl_final)
+model[2]
 
+tidy(extract_model(wfl_final)) %>%
+  filter(lambda > 0.98 & lambda < 1.01)
+
+## @knitr trainset_prediction
+train_predict <- stats::predict(wfl_final, type = "prob", new_data = trainset_ahDiff)
+train_predict$
 train_probs <- 
   predict(wfl_final, type = "prob", new_data = trainset_ahDiff) %>%
   bind_cols(obs = trainset_ahDiff$PIK3CA_T) %>%
@@ -140,6 +145,14 @@ confusion_matrix <- conf_mat(train_probs, obs, .pred_class)
 roc_curve_train <- autoplot(roc_curve(train_probs, obs, .pred_Mutant))
 
 roc_auc_train <- roc_auc(train_probs, obs, .pred_Mutant)
+
+confusion_matrix
+
+roc_curve_train
+
+roc_auc_train
+
+tidypredict::tidypredict_fit(wfl_final$fit$fit)
 
 ## @knitr testset_prediction
 
