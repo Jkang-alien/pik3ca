@@ -18,3 +18,5 @@ ID <- gsub("[A-Z]{1}-[0-9]{2}[A-Z]{1}-[0-9A-Z]{4}-[0-9]{2}", '',
 data_rna_unique <- data_rna[duplicated(ID) == FALSE,]
 
 duplicated(ID)
+
+## Mutation
