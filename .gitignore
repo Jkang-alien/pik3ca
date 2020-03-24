@@ -4,4 +4,6 @@
 .Ruserdata
 *.RData
 20160128-BRCA-RNAseq2GeneNorm.txt
-
+mutations.txt
+mutations_transposed.txt
+clinical.txt
