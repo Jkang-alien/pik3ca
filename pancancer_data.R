@@ -64,34 +64,15 @@ valueMad <- data %>%
 
 summary(valueMad)
 
-variance <- data %>%
-  select(-variant, -ID) %>%
-  map_dbl(var, na.rm = TRUE)
-
-sum(is.na(variance))
-summary(variance)
-summary(variance[variance > median(variance)])
-
 dataLV <- data[,-1:-2][,valueMad > median(valueMad)]
 
 dataLV$variant <- data$variant
 dataLV$ID <- data$ID
 
-stasticsWilcox <- vector(mode = "list", length = dim(dataLV)[2])
-pvalueWilcox <- vector(mode = "list", length = dim(dataLV)[2])
-
-for (i in 1:(dim(dataLV)[2]-1)) {
-  a <- wilcox.test(pull(dataLV[,i]) ~ dataLV$variant)
-  stasticsWilcox[[i]] <- a$statistic
-  pvalueWilcox[[i]] <- a$p.value
-}
 
 clinical <- read_delim("clinical.txt", delim = '\t')
 
 ## @knitr modeling
-
-load("datasetDiff.RData")
-load("glmn_tune.RData")
 
 library(tidymodels)
 library(glmnet)
