@@ -173,9 +173,13 @@ roc_auc_train <- roc_auc(train_probs, obs, .pred_TRUE)
 test_probs <- 
   predict(wfl_final, type = "prob", new_data = testset) %>%
   bind_cols(obs = testset$variant) %>%
-  bind_cols(predict(wfl_final, new_data = testset))
+  bind_cols(predict(wfl_final, new_data = testset)) %>%
+  bind_cols(type = testset$type)
 
-conf_mat(test_probs, obs, .pred_class)
+test_probs %>%
+  filter(type == "BLCA") %>%
+  conf_mat(obs, .pred_class)
+
 autoplot(roc_curve(test_probs, obs, .pred_TRUE))
 
 roc_auc(test_probs, obs, .pred_TRUE)
