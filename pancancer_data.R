@@ -62,9 +62,9 @@ valueMad <- data %>%
   select(-variant, -ID) %>%
   map_dbl(mad, na.rm = TRUE)
 
-summary(valueMad)
+quantile(valueMad)[4]
 
-dataLV <- data[,-1:-2][,valueMad > median(valueMad)]
+dataLV <- data[,-1:-2][,valueMad > quantile(valueMad)[4]]
 
 dataLV$variant <- data$variant
 dataLV$ID <- data$ID
@@ -80,23 +80,26 @@ library(skimr)
 
 
 
-skim(clinical)
-summary(factor(clinical$type))
-head(clinical$bcr_patient_barcode)
+#skim(clinical)
+#summary(factor(clinical$type))
+#head(clinical$bcr_patient_barcode)
 
 hist <- clinical %>%
   select(bcr_patient_barcode, type) %>%
   rename(ID = "bcr_patient_barcode")
 
 dataset <- inner_join(hist, dataLV, by = "ID" )
+dataset$variant <- factor(dataset$variant)
+dataset$type <- factor(dataset$type)
 
+sum(is.na(dataset))
 set.seed(930093)
 
 initSplit <- initial_split(dataset, strata = variant)
 trainset <- training(initSplit)
 testset <- testing(initSplit)
 
-cv_splits <- rsample::vfold_cv(trainset, strata = variant , repeats = 5)
+cv_splits <- rsample::vfold_cv(trainset, strata = variant)
 
 mod <- logistic_reg(penalty = tune(),
                     mixture = tune()) %>%
@@ -104,6 +107,7 @@ mod <- logistic_reg(penalty = tune(),
 
 rec <- recipe(variant ~ ., data = trainset) %>%
   update_role(ID, new_role = "id variable") %>%
+  step_knnimpute(all_numeric()) %>%
   step_BoxCox(all_numeric()) %>%
   step_center(all_numeric()) %>%
   step_scale(all_numeric()) %>%
@@ -115,13 +119,13 @@ wfl <-
   add_recipe(rec) %>%
   add_model(mod)
 
-glmn_set <- parameters(penalty(range = c(-5,3), trans = log10_trans()),
+glmn_set <- parameters(penalty(range = c(-5,2), trans = log10_trans()),
                        mixture())
 
 glmn_grid <- 
-  grid_regular(glmn_set, levels = c(9, 5))
+  grid_regular(glmn_set, levels = c(8, 5))
 
-ctrl <- control_grid(save_pred = TRUE, verbose = TRUE)
+ctrl <- control_grid(save_pred = FALSE, verbose = TRUE)
 
 ## @knitr fitting
 
@@ -131,4 +135,49 @@ glmn_tune <-
             grid = glmn_grid,
             metrics = metric_set(roc_auc),
             control = ctrl)
+
+save(glmn_tune, file = "glmn_tune_pancancer.RData")
+load("glmn_tune_pancancer.RData")
+
+glmn_tune_tidy <- glmn_tune %>%
+  select(-splits)
+
+show_best(glmn_tune)
+
+lasso_glmn <- show_best(glmn_tune)[4,1:2]
+best_glmn <- select_best(glmn_tune)
+mix <- show_best(glmn_tune)[3,1:2]
+
+## @knitr Finalize_model
+
+wfl_final <- 
+  wfl %>%
+  finalize_workflow(best_glmn) %>%
+  fit(data = trainset)
+
+## @knitr trainset_prediction
+
+train_probs <- 
+  predict(wfl_final, type = "prob", new_data = trainset) %>%
+  bind_cols(obs = trainset$variant) %>%
+  bind_cols(predict(wfl_final, new_data = trainset))
+
+confusion_matrix <- conf_mat(train_probs, obs, .pred_class)
+
+roc_curve_train <- autoplot(roc_curve(train_probs, obs, .pred_TRUE))
+
+roc_auc_train <- roc_auc(train_probs, obs, .pred_TRUE)
+
+## @knitr testset_prediction
+
+test_probs <- 
+  predict(wfl_final, type = "prob", new_data = testset) %>%
+  bind_cols(obs = testset$variant) %>%
+  bind_cols(predict(wfl_final, new_data = testset))
+
+conf_mat(test_probs, obs, .pred_class)
+autoplot(roc_curve(test_probs, obs, .pred_TRUE))
+
+roc_auc(test_probs, obs, .pred_TRUE)
+
 

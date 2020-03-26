@@ -1,7 +1,7 @@
 ---
 title: "PIK3CA mutation prediction"
 output: "html_document"
-bibliography: bibliography.bib
+bibliography: "references.bib"
 ---
 
 ```{r setup, include=FALSE}
@@ -35,6 +35,7 @@ Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in 
 
 Universial prediction using gene expression data across cancer type for certain kind of mutation. It's clinically useless now, but we want to explore the possibilities of the PIK3CA mutation prediction.  
 
+RNAseq can be widely used. The mutation status directly predictio
 ### Dataset  
 
 PIK3CA mutation data was get using cgdsr rpackage. Gene expression data was get from GDAC firehose using RTCGAToolbox R package. ER immunostain postive HER2 immunostain negative and/or SISH negative breast cancers are included. Data of invasive ductal carcinomas were used for training set and data of invasive lobular carcinoma were used for test set. Number of observations were 530 in training set and 188 in test set. 
