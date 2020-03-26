@@ -142,7 +142,7 @@ load("glmn_tune_pancancer.RData")
 glmn_tune_tidy <- glmn_tune %>%
   select(-splits)
 
-show_best(glmn_tune)
+show_best(glmn_tune_tidy)
 
 lasso_glmn <- show_best(glmn_tune)[4,1:2]
 best_glmn <- select_best(glmn_tune)
