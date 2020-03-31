@@ -1,5 +1,9 @@
+## @knitr TCGA
+
 library(tidyverse)
+library(tidymodels)
 library(stringr)
+library(ggplot2)
 
 rna <- read_delim("D:/rproject/XCIpancancer/EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2-v2.geneExp.tsv",
                   delim = '\t')
@@ -34,6 +38,8 @@ summary(factor(mut$PIK3CA))
 
 variants <- c('C420R', 'E542K', 'E545A', 'E545D', 'E545G', 'E545K', 'Q546E', 'Q546R', 'H1047L', 'H1047R', 'H1047Y')
 
+na_variant <- c("N345K", "E726K")
+
 mut %>%
   filter(PIK3CA == variants)
 mut$PIK3CA %in% variants
@@ -49,40 +55,101 @@ mut <- mut %>%
   mutate(ID = gsub("-[0-9]{2}$", "", SAMPLE_ID)) %>%
   select(ID, variant)
 
+## @knitr saveTCGA
+
 data <- inner_join(mut, data_rna_unique, by = "ID")
 save(data, file = "panrna.RData")
 
-load('panrna.RData')
+## @knitr GEO
 
-library(purrr)
-library(tidyverse)
-library(ggplot2)
+library(GEOquery)
 
-valueMad <- data %>%
-  select(-variant, -ID) %>%
+## https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60788
+
+gse <- getGEO("GSE60788", GSEMatrix = TRUE)
+show(gse)
+
+save(gse, file = "gse.RData")
+load("gse.RData")
+
+summary(gse)
+
+dim(pData(gse[[1]]))
+phenotype <- pData(gse[[1]])
+skim(phenotype)
+
+summary(factor(phenotype$`pik3ca mutations:ch1`))
+
+phenotype$`pik3ca mutations:ch1`[grep("N345K", phenotype$`pik3ca mutations:ch1`)] <- NA
+
+variantGES <- phenotype %>%
+  mutate(variant = factor(is.na(`pik3ca mutations:ch1`) == FALSE)) %>%
+  select(title, variant) %>%
+  rename(ID = "title")
+
+tail(colnames(testsetGSE))
+ 
+# df1 <- getGSEDataTables("GSE60788")
+
+gunzip("GSE60788_UCSC_Human_hg19_knownGenes_20120910_addInfo.txt.gz")
+
+gds <- getGEO(filename=system.file("extdata/GSE22035.soft.gz",package="GEOquery"))
+
+gseRNA <- read_delim("GSE60788_rnaseq_gex_normalized.txt", delim = '\t')
+
+gesClinical <- read_delim("GSE60788_UCSC_Human_hg19_knownGenes_20120910_addInfo.txt", delim = '\t')
+
+skim(gesClinical)
+
+colnames(gseRNA)[-1]
+
+testsetGSE <- data.table::data.table(t(gseRNA[,-1]))
+colnames(testsetGSE) <- gseRNA$`Gene Symbol`
+testsetGSE$type <- rep("BRCA", dim(testsetGSE)[1])
+
+testsetGSE$ID <- colnames(gseRNA)[-1]
+
+testsetGSE <- inner_join(variantGES, testsetGSE, by = "ID")
+
+testsetGSE$variant <- factor(testsetGSE$variant)
+
+## @knitr saveGSEtestset
+
+save(testsetGSE, file = "testsetGSE.RData")
+
+colnames(testsetGSE) <- gseRNA$`Gene Symbol`
+
+## @knitr select matched genes
+load("panrna.RData")
+colnames(data)[1:5]
+data_temp <- data[, colnames(data) %in% colnames(testsetGSE)]
+#data_temp$ID <- data$ID
+#data_temp$variant <- data$variant
+
+#data <- data_temp
+
+#rm(data_temp)
+
+## knitr histology
+
+valueMad <- data_temp %>%
+  #select(-variant, -ID) %>%
   map_dbl(mad, na.rm = TRUE)
 
 quantile(valueMad)[4]
 
-dataLV <- data[,-1:-2][,valueMad > quantile(valueMad)[4]]
+dataLV <- data_temp[,valueMad > quantile(valueMad)[4]]
 
 dataLV$variant <- data$variant
 dataLV$ID <- data$ID
 
+sum(is.na(dataLV))
 
 clinical <- read_delim("clinical.txt", delim = '\t')
 
-## @knitr modeling
-
-library(tidymodels)
 library(glmnet)
 library(skimr)
 
-
-
-#skim(clinical)
-#summary(factor(clinical$type))
-#head(clinical$bcr_patient_barcode)
 
 hist <- clinical %>%
   select(bcr_patient_barcode, type) %>%
@@ -93,6 +160,9 @@ dataset$variant <- factor(dataset$variant)
 dataset$type <- factor(dataset$type)
 
 sum(is.na(dataset))
+
+## @knitr modeling
+
 set.seed(930093)
 
 initSplit <- initial_split(dataset, strata = variant)
@@ -108,7 +178,7 @@ mod <- logistic_reg(penalty = tune(),
 rec <- recipe(variant ~ ., data = trainset) %>%
   update_role(ID, new_role = "id variable") %>%
   step_knnimpute(all_numeric()) %>%
-  step_BoxCox(all_numeric()) %>%
+  step_YeoJohnson(all_numeric()) %>%
   step_center(all_numeric()) %>%
   step_scale(all_numeric()) %>%
   step_dummy(type)%>%
@@ -142,7 +212,7 @@ load("glmn_tune_pancancer.RData")
 glmn_tune_tidy <- glmn_tune %>%
   select(-splits)
 
-show_best(glmn_tune_tidy)
+show_best(glmn_tune)
 
 lasso_glmn <- show_best(glmn_tune)[4,1:2]
 best_glmn <- select_best(glmn_tune)
@@ -177,11 +247,26 @@ test_probs <-
   bind_cols(type = testset$type)
 
 test_probs %>%
-  filter(type == "BLCA") %>%
+  filter(type == "BRCA") %>%
   conf_mat(obs, .pred_class)
+
+autoplot(roc_curve(test_probs %>%
+                     filter(type == "BRCA"),
+                   obs, .pred_TRUE))
+
+roc_auc(test_probs %>%
+          filter(type == "BRCA"), obs, .pred_TRUE)
+
+## knitr testsetGEO
+
+test_probs <- 
+  predict(wfl_final, type = "prob", new_data = testsetGSE) %>%
+  bind_cols(obs = testsetGSE$variant) %>%
+  bind_cols(predict(wfl_final, new_data = testsetGSE))
+
 
 autoplot(roc_curve(test_probs, obs, .pred_TRUE))
 
 roc_auc(test_probs, obs, .pred_TRUE)
 
-
+conf_mat(test_probs, obs, .pred_class)

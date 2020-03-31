@@ -7,3 +7,5 @@
 mutations.txt
 mutations_transposed.txt
 clinical.txt
+GSE60788_UCSC_Human_hg19_knownGenes_20120910_addInfo.txt
+GSE60788_rnaseq_gex_normalized.txt
