@@ -121,6 +121,8 @@ colnames(testsetGSE) <- gseRNA$`Gene Symbol`
 
 ## @knitr select matched genes
 load("panrna.RData")
+load("testsetGSE.RData")
+
 colnames(data)[1:5]
 data_temp <- data[, colnames(data) %in% colnames(testsetGSE)]
 #data_temp$ID <- data$ID
@@ -161,8 +163,11 @@ dataset$type <- factor(dataset$type)
 
 sum(is.na(dataset))
 
+save(dataset, testsetGSE, file = "dataset.RData")
+
 ## @knitr modeling
 
+load("dataset.RData")
 set.seed(930093)
 
 initSplit <- initial_split(dataset, strata = variant)
@@ -177,12 +182,12 @@ mod <- logistic_reg(penalty = tune(),
 
 rec <- recipe(variant ~ ., data = trainset) %>%
   update_role(ID, new_role = "id variable") %>%
-  step_knnimpute(all_numeric()) %>%
+  #step_knnimpute(all_numeric()) %>%
   step_YeoJohnson(all_numeric()) %>%
   step_center(all_numeric()) %>%
   step_scale(all_numeric()) %>%
-  step_dummy(type)%>%
-  step_downsample(variant)
+  step_dummy(type)#%>%
+  #step_downsample(variant)
 
 wfl <- 
   workflow() %>%
@@ -230,13 +235,60 @@ wfl_final <-
 train_probs <- 
   predict(wfl_final, type = "prob", new_data = trainset) %>%
   bind_cols(obs = trainset$variant) %>%
-  bind_cols(predict(wfl_final, new_data = trainset))
+  bind_cols(predict(wfl_final, new_data = trainset)) %>%
+  bind_cols(type = trainset$type)
 
-confusion_matrix <- conf_mat(train_probs, obs, .pred_class)
+confusion_matrix <- train_probs %>%
+  #group_by(type) %>%
+  conf_mat(obs, .pred_class)
+
+confusion_matrix
+
+confusion_matrix_type <- train_probs %>%
+  group_by(type) %>%
+  conf_mat(obs, .pred_class)
+
+confusion_matrix[1,2][[1]]
 
 roc_curve_train <- autoplot(roc_curve(train_probs, obs, .pred_TRUE))
 
-roc_auc_train <- roc_auc(train_probs, obs, .pred_TRUE)
+roc_auc_train <- train_probs %>%
+  roc_auc(obs, .pred_TRUE)
+
+roc_auc_train$type <- "ALL"
+
+roc_auc_train_type <- train_probs %>%
+  group_by(type) %>%
+  roc_auc(obs, .pred_TRUE) %>%
+  mutate(type = as.character(type))
+
+roc_plot_type <- roc_auc_train_type %>%
+  bind_rows(roc_auc_train) %>%
+  ggplot(aes(x=reorder(type, -.estimate), y=.estimate)) +
+  geom_bar(stat="identity") + 
+  coord_flip()
+
+roc_auc_train <- train_probs %>%
+  roc_auc(obs, .pred_TRUE)
+
+roc_auc_train
+
+## @knitr correlation
+
+mutationRate <- trainset %>%
+  select(type, variant) %>%
+  group_by(type) %>%
+  count(variant == TRUE) %>%
+  rename(variant = 'variant == TRUE') %>%
+  spread(variant, n) %>%
+  mutate(rate = `TRUE`/(`TRUE`+`FALSE`)) %>%
+  bind_cols(roc_auc_train_type)
+
+mutationRate %>%
+  ggplot(aes(x=rate, y=.estimate)) +
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x) +
+  ggrepel::geom_text_repel(data = mutationRate, aes(label = type))
 
 ## @knitr testset_prediction
 
@@ -246,16 +298,63 @@ test_probs <-
   bind_cols(predict(wfl_final, new_data = testset)) %>%
   bind_cols(type = testset$type)
 
-test_probs %>%
-  filter(type == "BRCA") %>%
+confusion_matrix_test <- test_probs %>%
+  #group_by(type) %>%
   conf_mat(obs, .pred_class)
 
-autoplot(roc_curve(test_probs %>%
-                     filter(type == "BRCA"),
-                   obs, .pred_TRUE))
+confusion_matrix_test
 
-roc_auc(test_probs %>%
-          filter(type == "BRCA"), obs, .pred_TRUE)
+confusion_matrix_test_type <- test_probs %>%
+  group_by(type) %>%
+  conf_mat(obs, .pred_class)
+
+confusion_matrix_test_type[1,2][[1]]
+
+roc_curve_test <- autoplot(roc_curve(test_probs, obs, .pred_TRUE))
+
+roc_curve_test
+
+roc_auc_test <- test_probs %>%
+  roc_auc(obs, .pred_TRUE)
+
+roc_auc_test$type <- "ALL"
+
+roc_auc_test_type <- test_probs %>%
+  group_by(type) %>%
+  roc_auc(obs, .pred_TRUE) %>%
+  mutate(type = as.character(type))
+
+roc_plot_test_type <- roc_auc_test_type %>%
+  bind_rows(roc_auc_test) %>%
+  ggplot(aes(x=reorder(type, -.estimate), y=.estimate)) +
+  geom_bar(stat="identity") + 
+  coord_flip()
+
+plot(roc_auc_train_type$.estimate, roc_auc_test_type$.estimate)
+
+roc_plot_test_type
+
+roc_auc_test <- test_probs %>%
+  roc_auc(obs, .pred_TRUE)
+
+roc_auc_test
+
+## @knitr correlation testset
+
+mutationRate <- testset %>%
+  select(type, variant) %>%
+  group_by(type) %>%
+  count(variant == TRUE) %>%
+  rename(variant = 'variant == TRUE') %>%
+  spread(variant, n) %>%
+  mutate(rate = `TRUE`/(`TRUE`+`FALSE`)) %>%
+  bind_cols(roc_auc_test_type)
+
+mutationRate %>%
+  ggplot(aes(x=rate, y=.estimate)) +
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x) +
+  ggrepel::geom_text_repel(data = mutationRate, aes(label = type))
 
 ## knitr testsetGEO
 
