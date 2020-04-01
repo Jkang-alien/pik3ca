@@ -60,87 +60,19 @@ mut <- mut %>%
 data <- inner_join(mut, data_rna_unique, by = "ID")
 save(data, file = "panrna.RData")
 
-## @knitr GEO
-
-library(GEOquery)
-
-## https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60788
-
-gse <- getGEO("GSE60788", GSEMatrix = TRUE)
-show(gse)
-
-save(gse, file = "gse.RData")
-load("gse.RData")
-
-summary(gse)
-
-dim(pData(gse[[1]]))
-phenotype <- pData(gse[[1]])
-skim(phenotype)
-
-summary(factor(phenotype$`pik3ca mutations:ch1`))
-
-phenotype$`pik3ca mutations:ch1`[grep("N345K", phenotype$`pik3ca mutations:ch1`)] <- NA
-
-variantGES <- phenotype %>%
-  mutate(variant = factor(is.na(`pik3ca mutations:ch1`) == FALSE)) %>%
-  select(title, variant) %>%
-  rename(ID = "title")
-
-tail(colnames(testsetGSE))
- 
-# df1 <- getGSEDataTables("GSE60788")
-
-gunzip("GSE60788_UCSC_Human_hg19_knownGenes_20120910_addInfo.txt.gz")
-
-gds <- getGEO(filename=system.file("extdata/GSE22035.soft.gz",package="GEOquery"))
-
-gseRNA <- read_delim("GSE60788_rnaseq_gex_normalized.txt", delim = '\t')
-
-gesClinical <- read_delim("GSE60788_UCSC_Human_hg19_knownGenes_20120910_addInfo.txt", delim = '\t')
-
-skim(gesClinical)
-
-colnames(gseRNA)[-1]
-
-testsetGSE <- data.table::data.table(t(gseRNA[,-1]))
-colnames(testsetGSE) <- gseRNA$`Gene Symbol`
-testsetGSE$type <- rep("BRCA", dim(testsetGSE)[1])
-
-testsetGSE$ID <- colnames(gseRNA)[-1]
-
-testsetGSE <- inner_join(variantGES, testsetGSE, by = "ID")
-
-testsetGSE$variant <- factor(testsetGSE$variant)
-
-## @knitr saveGSEtestset
-
-save(testsetGSE, file = "testsetGSE.RData")
-
-colnames(testsetGSE) <- gseRNA$`Gene Symbol`
 
 ## @knitr select matched genes
 load("panrna.RData")
-load("testsetGSE.RData")
 
 colnames(data)[1:5]
-data_temp <- data[, colnames(data) %in% colnames(testsetGSE)]
-#data_temp$ID <- data$ID
-#data_temp$variant <- data$variant
 
-#data <- data_temp
-
-#rm(data_temp)
-
-## knitr histology
-
-valueMad <- data_temp %>%
-  #select(-variant, -ID) %>%
+valueMad <- data %>%
+  select(-variant, -ID) %>%
   map_dbl(mad, na.rm = TRUE)
 
 quantile(valueMad)[4]
 
-dataLV <- data_temp[,valueMad > quantile(valueMad)[4]]
+dataLV <- data[,-1:-2][,valueMad > quantile(valueMad)[4]]
 
 dataLV$variant <- data$variant
 dataLV$ID <- data$ID
@@ -163,7 +95,7 @@ dataset$type <- factor(dataset$type)
 
 sum(is.na(dataset))
 
-save(dataset, testsetGSE, file = "dataset.RData")
+save(dataset, file = "dataset.RData")
 
 ## @knitr modeling
 
@@ -208,7 +140,7 @@ glmn_tune <-
   tune_grid(wfl,
             resamples = cv_splits,
             grid = glmn_grid,
-            metrics = metric_set(roc_auc),
+            metrics = metric_set(roc_auc, pr_auc),
             control = ctrl)
 
 save(glmn_tune, file = "glmn_tune_pancancer.RData")
@@ -355,17 +287,3 @@ mutationRate %>%
   geom_point() +
   geom_smooth(method='lm', formula= y~x) +
   ggrepel::geom_text_repel(data = mutationRate, aes(label = type))
-
-## knitr testsetGEO
-
-test_probs <- 
-  predict(wfl_final, type = "prob", new_data = testsetGSE) %>%
-  bind_cols(obs = testsetGSE$variant) %>%
-  bind_cols(predict(wfl_final, new_data = testsetGSE))
-
-
-autoplot(roc_curve(test_probs, obs, .pred_TRUE))
-
-roc_auc(test_probs, obs, .pred_TRUE)
-
-conf_mat(test_probs, obs, .pred_class)
