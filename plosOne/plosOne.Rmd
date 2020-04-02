@@ -1,0 +1,141 @@
+---
+title: Prediction of PIK3CA mutation with gene expression
+author:
+  - name: Jun Kang
+    email: jkang.alien@gmail.com
+    affiliation: Department of Hospital Pathology, Seoul St. Mary’s Hospital, College of Medicine, The Catholic University of Korea, Seoul, South Korea
+    corresponding: jkang.alien@gmail.com
+
+abstract: |
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur eget porta erat. Morbi consectetur est vel gravida pretium. Suspendisse ut dui eu ante cursus gravida non sed sem. Nullam sapien tellus, commodo id velit id, eleifend volutpat quam. Phasellus mauris velit, dapibus finibus elementum vel, pulvinar non tellus. Nunc pellentesque pretium diam, quis maximus dolor faucibus id. Nunc convallis sodales ante, ut ullamcorper est egestas vitae. Nam sit amet enim ultrices, ultrices elit pulvinar, volutpat risus.
+  
+bibliography: mybibfile.bib
+output: rticles::plos_article
+csl: plos.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+```{r}
+knitr::read_chunk('../data.R')
+knitr::read_chunk('../prediction.R')
+knitr::read_chunk('../logisticRegression.R')
+```
+
+# Introduction
+
+A list
+
+- Brevity
+- Logic and clarity
+- Clean typing
+
+The problem  
+
+- PIK3CA mutation in selecting drug  
+
+Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in hormone receptor positive HER2 negative subtype. @andre_2019_alpelisib_nengljmeda Prediction of PIK3CA mutation was done by gene expression data of TCGA. 
+
+- Predicting mutation by gene expression data
+  * What for?  
+  * Feasible?  
+  * Cost?  
+
+- Varing frquency of PIK3CA mutation across cancer types  
+  * High in endometrial breast  
+  * not common other cancer type
+
+Universial prediction using gene expression data across cancer type for certain kind of mutation. It's clinically useless now, but we want to explore the possibilities of the PIK3CA mutation prediction.  
+
+RNAseq can be widely used. The mutation status directly predictio
+
+Previous study @way_2018_machine_cellreports
+
+The proposed solution  
+
+
+
+# Materials and Methods
+
+## Dataset
+
+PIK3CA mutation data was get using cgdsr rpackage. Gene expression data was get from GDAC firehose using RTCGAToolbox R package. ER immunostain postive HER2 immunostain negative and/or SISH negative breast cancers are included. Data of invasive ductal carcinomas were used for training set and data of invasive lobular carcinoma were used for test set. Number of observations were 530 in training set and 188 in test set. 
+
+## Selecting variable for modeling  
+
+To narrow down potential predictors, Genes with a large variance (more than median) and differently expressed by PIK3CA mutation status (wilcox test, *P* $<10^{-8}$) were selected. 111 out of 20502 genes were included in the modeling process.   
+
+## Preprocessing  
+
+BoxCox transformation was done to correct skewness. Centering and scaling were done. All preprocessing was done using recipe r package.  
+
+## Modeling  
+
+Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid: $\lambda$ {$10^{-5}$, $10^{-4}$,$10^{-3}$,$10^{-2}$,$10^{-1}$, $10^{0}$}, $\alpha$ {0.0, 0.25, 0.5, 0.75}. Model performance was evealuated with the area under receiver operating characteristic (ROC) and area under the ROC (AUROC) and precision recall (PR) and area under curve (AUPR).  
+
+# Results
+
+```{r load}
+<<load>>
+```
+
+```{r}
+<<modeling>>
+```
+
+```{r}
+<<Finalize_model>>
+
+```
+
+Table 1. Frequency of PIK3CA mutation in training set and test set  
+
+```{r}
+library(tidyverse)
+train_target <- tibble::tibble(summary(trainSetDiff$PIK3CA_T)) 
+test_target <- tibble::tibble(summary(testSetDiff$PIK3CA_T))
+target <- bind_cols(train_target, test_target) %>%
+  rename(TrainSet = "summary(trainSetDiff$PIK3CA_T)", TestSet = "summary(testSetDiff$PIK3CA_T)")
+knitr::kable(target)
+
+```
+
+
+
+```{r}
+<<trainset_prediction>>
+
+knitr::kable(confusion_matrix$table)
+```
+
+## selecting model
+Cross-validation 
+The model showed best performance at lambda = 0.01 and alpha = 1.0 (Ridge regression). 
+
+## Prediction performance  
+
+## performance of each cancer type  
+
+## Important predictors  
+
+
+# Discussion
+
+Main message answers the question and main supporting evidence    
+
+Critical assessment opinions on 
+- any shortcomings in study design  
+- limitations in methods
+- flaws in analysis
+- validity of assumption 
+
+Comparison with other studies where inconsistencies are discussed  
+
+Conclusions comments on possible biological or clinical implications and suggestions for further research.  
+Evaluate the results - not the authors
+
+
+
+# References {#references .unnumbered}
