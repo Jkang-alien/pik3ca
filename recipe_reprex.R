@@ -34,10 +34,6 @@ glmn_grid <-
 ctrl <- control_grid(save_pred = FALSE, verbose = TRUE)
 
 ## @knitr fitting
-library(doParallel)
-cl <- makeCluster(2)
-registerDoParallel(cl)
-
 
 glmn_tune <- 
   tune_grid(wfl,
@@ -46,6 +42,21 @@ glmn_tune <-
             metrics = metric_set(roc_auc),
             control = ctrl)
 
-stopCluster(cl)
+## finalize model
 
-glmn_tune$.notes[1]
+best_glmn <- select_best(glmn_tune, metric = "roc_auc")
+
+wfl_final <- 
+  wfl %>%
+  finalize_workflow(best_glmn) %>%
+  fit(data = trainset)
+
+## @knitr save
+
+save(wfl_final, file="wfl_final.RData")
+
+## @knitr load
+
+load("wfl_final.RData")
+
+tidy(extract_model(wfl_final))

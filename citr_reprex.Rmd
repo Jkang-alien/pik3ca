@@ -1,0 +1,11 @@
+---
+title: "citr error"
+author: "JK"
+date: '2020 4 1 '
+output: html_document
+bibliography: author20.bib
+---
+
+citation [@andre_2019_alpelisib_nengljmeda]
+
+## References  

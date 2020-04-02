@@ -1,7 +1,7 @@
 ---
 title: "PIK3CA mutation prediction"
-output: "html_document"
-bibliography: "references.bib"
+output: "github_document"
+bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -22,7 +22,7 @@ PIK3CA mutation prediction by gene expression data
 
 - PIK3CA mutation in selecting drug  
 
-Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in hormone receptor positive HER2 negative subtype. Prediction of PIK3CA mutation was done by gene expression data of TCGA.[] 
+Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in hormone receptor positive HER2 negative subtype. Prediction of PIK3CA mutation was done by gene expression data of TCGA. 
 
 - Predicting mutation by gene expression data
   * What for?  
@@ -78,9 +78,9 @@ BoxCox transformation was done to correct skewness. Centering and scaling were d
 
 ### Modeling  
 
-Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid: $\lambda$ {$10^{-5}$, $10^{-4}$,$10^{-3}$,$10^{-2}$,$10^{-1}$, $10^{0}$}, $\alpha$ {0.0, 0.25, 0.5, 0.75}. Model performance was evealuated with the receiver operating characteristic (AUROC).  
+Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid: $\lambda$ {$10^{-5}$, $10^{-4}$,$10^{-3}$,$10^{-2}$,$10^{-1}$, $10^{0}$}, $\alpha$ {0.0, 0.25, 0.5, 0.75}. Model performance was evealuated with the area under receiver operating characteristic (ROC) and area under the ROC (AUROC) and precision recall (PR) and area under curve (AUPR).  
 
-The model showed best performance at lambda = 0.01 and alpha = 1.0 (Ridge regression). 
+
 
 
 
@@ -92,4 +92,14 @@ The model showed best performance at lambda = 0.01 and alpha = 1.0 (Ridge regres
 knitr::kable(confusion_matrix$table)
 ```
 
+## Results
 
+### selecting model
+Cross-validation 
+The model showed best performance at lambda = 0.01 and alpha = 1.0 (Ridge regression). 
+
+### Prediction performance  
+
+#### performance of each cancer type  
+
+#### Important predictors  
