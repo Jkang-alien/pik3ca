@@ -19,9 +19,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 ```
 
 ```{r}
-knitr::read_chunk('../data.R')
 knitr::read_chunk('../prediction.R')
-knitr::read_chunk('../logisticRegression.R')
 ```
 
 # Introduction
@@ -49,27 +47,28 @@ Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in 
 
 Universial prediction using gene expression data across cancer type for certain kind of mutation. It's clinically useless now, but we want to explore the possibilities of the PIK3CA mutation prediction.  
 
-RNAseq can be widely used. The mutation status directly predictio
+RNAseq can be widely used. The mutation status directly prediction
 
 Previous study @way_2018_machine_cellreports
 
+prediction of aberant activation of a certain pathway vs a specific mutation
 The proposed solution  
 
-
+Prediction RAS pathway activation with gene expression data was done in previous study. @way_2018_machine_cellreports They trained pancancer The Cancer Genome Atlas (TCGA) data with a supervised elastic net penalized logistic regression classifier with stochastic gradient descent. The performance of their model was 84% with an area under the receiver operating characteristic (AUROC) curve and 63% with an area under the precision recall (AUPR) curve. We applied their modeling methods in prediction PIK3CA mutation.     
 
 # Materials and Methods
 
 ## Dataset
 
-PIK3CA mutation data was get using cgdsr rpackage. Gene expression data was get from GDAC firehose using RTCGAToolbox R package. ER immunostain postive HER2 immunostain negative and/or SISH negative breast cancers are included. Data of invasive ductal carcinomas were used for training set and data of invasive lobular carcinoma were used for test set. Number of observations were 530 in training set and 188 in test set. 
+We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr rpackage. Gene expression data was get from GDAC firehose using RTCGAToolbox R package. ER immunostain postive HER2 immunostain negative and/or SISH negative breast cancers are included. Data of invasive ductal carcinomas were used for training set and data of invasive lobular carcinoma were used for test set. Number of observations were 530 in training set and 188 in test set. 
 
 ## Selecting variable for modeling  
 
-To narrow down potential predictors, Genes with a large variance (more than median) and differently expressed by PIK3CA mutation status (wilcox test, *P* $<10^{-8}$) were selected. 111 out of 20502 genes were included in the modeling process.   
+To narrow down potential predictors, Genes with a large the median absolute deviation (more than third-quartiles) were selected. 5000 out of 20502 genes were included in the modeling process.   
 
 ## Preprocessing  
 
-BoxCox transformation was done to correct skewness. Centering and scaling were done. All preprocessing was done using recipe r package.  
+Yeo-Johnson transformation was done to correct skewness. Centering and scaling were done. All preprocessing was done using recipe r package.  
 
 ## Modeling  
 
@@ -77,42 +76,11 @@ Penalized logistic regression was applied to prediction modeling. 10-fold cross-
 
 # Results
 
-```{r load}
-<<load>>
-```
 
-```{r}
-<<modeling>>
-```
+## selecting model 
 
-```{r}
-<<Finalize_model>>
-
-```
-
-Table 1. Frequency of PIK3CA mutation in training set and test set  
-
-```{r}
-library(tidyverse)
-train_target <- tibble::tibble(summary(trainSetDiff$PIK3CA_T)) 
-test_target <- tibble::tibble(summary(testSetDiff$PIK3CA_T))
-target <- bind_cols(train_target, test_target) %>%
-  rename(TrainSet = "summary(trainSetDiff$PIK3CA_T)", TestSet = "summary(testSetDiff$PIK3CA_T)")
-knitr::kable(target)
-
-```
-
-
-
-```{r}
-<<trainset_prediction>>
-
-knitr::kable(confusion_matrix$table)
-```
-
-## selecting model
-Cross-validation 
-The model showed best performance at lambda = 0.01 and alpha = 1.0 (Ridge regression). 
+Cross-validation  
+The model showed best performance at lambda = 0.01 and alpha = 1.0 (Ridge regression).  
 
 ## Prediction performance  
 
@@ -123,12 +91,25 @@ The model showed best performance at lambda = 0.01 and alpha = 1.0 (Ridge regres
 
 # Discussion
 
+Our model showed good performance to predict PIK3CA mutation of various cancer types.  
+
 Main message answers the question and main supporting evidence    
 
 Critical assessment opinions on 
 - any shortcomings in study design  
+
+In this study, the split method was done for testset instead of indepedent testset. Because there is no standard analysis method for the RNA-seq gene expression quantification, it is difficult to find gene expression data same as TGCA data. Developing standard analysis method for gene expression data is neccessory to apply this prediction model.  
+
+
+
+
 - limitations in methods
-- flaws in analysis
+
+Case imbalance  
+
+- flaws in analysis  
+
+
 - validity of assumption 
 
 Comparison with other studies where inconsistencies are discussed  
@@ -139,3 +120,7 @@ Evaluate the results - not the authors
 
 
 # References {#references .unnumbered}
+
+
+# Figure legends  
+

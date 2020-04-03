@@ -1,7 +1,7 @@
 ## @knitr exploreCVResult
 library(tidyverse)
 library(tidymodels)
-load(file = "wflFinal.RData")
+load(file = "D:/rproject/pik3ca/wflFinal.RData")
 load(file = "glmn_tune_pancancer.RData")
 
 
@@ -40,16 +40,18 @@ coeff <- tidy(extract_model(wfl_final)) %>%
   arrange(-abs(estimate)) %>%
   filter(!grepl("type_", term))
 
-head(coeff, n=30) %>%
+coeffPlot <- head(coeff, n=30) %>%
   filter(term != "(Intercept)") %>%
   ggplot(aes(x=reorder(term, -estimate), y=estimate)) +
     geom_bar(stat = "identity") +
     coord_flip()
 
-tidy(extract_model(wfl_final)) %>%
+typeCoeff <- tidy(extract_model(wfl_final)) %>%
   filter(lambda > 0.09 & lambda < 0.104) %>%
   arrange(-abs(estimate)) %>%
-  filter(grepl("type_", term)) %>%
+  filter(grepl("type_", term))
+
+typePlot <- typeCoeff %>%
   ggplot(aes(x=reorder(term, -estimate), y=estimate)) +
   geom_bar(stat = "identity") +
   coord_flip()
@@ -108,7 +110,7 @@ mutationRate <- trainset %>%
   mutate(rate = `TRUE`/(`TRUE`+`FALSE`)) %>%
   bind_cols(roc_auc_train_type)
 
-mutationRate %>%
+mutatioPlot <- mutationRate %>%
   ggplot(aes(x=rate, y=.estimate)) +
   geom_point() +
   geom_smooth(method='lm', formula= y~x) +
@@ -154,7 +156,7 @@ roc_plot_test_type <- roc_auc_test_type %>%
   geom_bar(stat="identity") + 
   coord_flip()
 
-plot(roc_auc_train_type$.estimate, roc_auc_test_type$.estimate)
+test_trainPlot <- plot(roc_auc_train_type$.estimate, roc_auc_test_type$.estimate)
 
 roc_plot_test_type
 
@@ -165,7 +167,7 @@ roc_auc_test
 
 ## @knitr correlation testset
 
-mutationRate <- testset %>%
+mutationRateTest <- testset %>%
   select(type, variant) %>%
   group_by(type) %>%
   count(variant == TRUE) %>%
@@ -174,8 +176,11 @@ mutationRate <- testset %>%
   mutate(rate = `TRUE`/(`TRUE`+`FALSE`)) %>%
   bind_cols(roc_auc_test_type)
 
-mutationRate %>%
+mutationTestPlot <- mutationRateTest %>%
   ggplot(aes(x=rate, y=.estimate)) +
   geom_point() +
   geom_smooth(method='lm', formula= y~x) +
   ggrepel::geom_text_repel(data = mutationRate, aes(label = type))
+
+objects()[c(-8:-12, -17, -29, -31, -34, -35)])
+save(objects()[c(-8:-12, -17, -29, -31, -34, -35)], file = "prediction.RData")

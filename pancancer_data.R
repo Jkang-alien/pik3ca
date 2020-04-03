@@ -58,7 +58,7 @@ mut <- mut %>%
 ## @knitr saveTCGA
 
 data <- inner_join(mut, data_rna_unique, by = "ID")
-save(data, file = "panrna.RData")
+#save(data, file = "panrna.RData")
 
 
 ## @knitr select matched genes
@@ -163,5 +163,5 @@ wfl_final <-
   finalize_workflow(best_glmn) %>%
   fit(data = trainset)
 
-#save(wfl_final, file = "wflFinal.RData")
+save(wfl_final, file = "wflFinal.RData")
 

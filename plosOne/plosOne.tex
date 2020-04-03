@@ -281,11 +281,20 @@ Universial prediction using gene expression data across cancer type for
 certain kind of mutation. It's clinically useless now, but we want to
 explore the possibilities of the PIK3CA mutation prediction.
 
-RNAseq can be widely used. The mutation status directly predictio
+RNAseq can be widely used. The mutation status directly prediction
 
 Previous study {[}2{]}
 
-The proposed solution
+prediction of aberant activation of a certain pathway vs a specific
+mutation The proposed solution
+
+Prediction RAS pathway activation with gene expression data was done in
+previous study. {[}2{]} They trained pancancer The Cancer Genome Atlas
+(TCGA) data with a supervised elastic net penalized logistic regression
+classifier with stochastic gradient descent. The performance of their
+model was 84\% with an area under the receiver operating characteristic
+(AUROC) curve and 63\% with an area under the precision recall (AUPR)
+curve. We applied their modeling methods in prediction PIK3CA mutation.
 
 \hypertarget{materials-and-methods}{%
 \section{Materials and Methods}\label{materials-and-methods}}
@@ -293,23 +302,90 @@ The proposed solution
 \hypertarget{dataset}{%
 \subsection{Dataset}\label{dataset}}
 
-PIK3CA mutation data was get using cgdsr rpackage. Gene expression data
-was get from GDAC firehose using RTCGAToolbox R package. ER immunostain
-postive HER2 immunostain negative and/or SISH negative breast cancers
-are included. Data of invasive ductal carcinomas were used for training
-set and data of invasive lobular carcinoma were used for test set.
-Number of observations were 530 in training set and 188 in test set.
+We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr
+rpackage. Gene expression data was get from GDAC firehose using
+RTCGAToolbox R package. ER immunostain postive HER2 immunostain negative
+and/or SISH negative breast cancers are included. Data of invasive
+ductal carcinomas were used for training set and data of invasive
+lobular carcinoma were used for test set. Number of observations were
+530 in training set and 188 in test set.
+
+\hypertarget{selecting-variable-for-modeling}{%
+\subsection{Selecting variable for
+modeling}\label{selecting-variable-for-modeling}}
+
+To narrow down potential predictors, Genes with a large the median
+absolute deviation (more than third-quartiles) were selected. 5000 out
+of 20502 genes were included in the modeling process.
+
+\hypertarget{preprocessing}{%
+\subsection{Preprocessing}\label{preprocessing}}
+
+Yeo-Johnson transformation was done to correct skewness. Centering and
+scaling were done. All preprocessing was done using recipe r package.
+
+\hypertarget{modeling}{%
+\subsection{Modeling}\label{modeling}}
+
+Penalized logistic regression was applied to prediction modeling.
+10-fold cross-validation with targe variable stratification was done
+over the hyperparameter grid: \(\lambda\) \{\(10^{-5}\),
+\(10^{-4}\),\(10^{-3}\),\(10^{-2}\),\(10^{-1}\), \(10^{0}\)\},
+\(\alpha\) \{0.0, 0.25, 0.5, 0.75\}. Model performance was evealuated
+with the area under receiver operating characteristic (ROC) and area
+under the ROC (AUROC) and precision recall (PR) and area under curve
+(AUPR).
 
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
+\hypertarget{selecting-model}{%
+\subsection{selecting model}\label{selecting-model}}
+
+Cross-validation\\
+The model showed best performance at lambda = 0.01 and alpha = 1.0
+(Ridge regression).
+
+\hypertarget{prediction-performance}{%
+\subsection{Prediction performance}\label{prediction-performance}}
+
+\hypertarget{performance-of-each-cancer-type}{%
+\subsection{performance of each cancer
+type}\label{performance-of-each-cancer-type}}
+
+\hypertarget{important-predictors}{%
+\subsection{Important predictors}\label{important-predictors}}
+
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
 
+Our model showed good performance to predict PIK3CA mutation of various
+cancer types.
+
 Main message answers the question and main supporting evidence
 
-Critical assessment opinions on - any shortcomings in study design\\
-- limitations in methods - flaws in analysis - validity of assumption
+Critical assessment opinions on - any shortcomings in study design
+
+In this study, the split method was done for testset instead of
+indepedent testset. Because there is no standard analysis method for the
+RNA-seq gene expression quantification, it is difficult to find gene
+expression data same as TGCA data. Developing standard analysis method
+for gene expression data is neccessory to apply this prediction model.
+
+\begin{itemize}
+\tightlist
+\item
+  limitations in methods
+\end{itemize}
+
+Case imbalance
+
+\begin{itemize}
+\item
+  flaws in analysis
+\item
+  validity of assumption
+\end{itemize}
 
 Comparison with other studies where inconsistencies are discussed
 
@@ -320,6 +396,10 @@ Evaluate the results - not the authors
 \hypertarget{references}{%
 \section*{References}\label{references}}
 \addcontentsline{toc}{section}{References}
+
+\hypertarget{figure-legends}{%
+\section*{Figure legends}\label{figure-legends}}
+\addcontentsline{toc}{section}{Figure legends}
 
 \hypertarget{refs}{}
 \leavevmode\hypertarget{ref-andre_2019_alpelisib_nengljmeda}{}%
