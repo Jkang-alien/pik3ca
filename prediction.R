@@ -1,7 +1,7 @@
 ## @knitr exploreCVResult
 library(tidyverse)
 library(tidymodels)
-load(file = "D:/rproject/pik3ca/wflFinal.RData")
+
 load(file = "glmn_tune_pancancer.RData")
 
 
@@ -81,6 +81,13 @@ roc_curve_train <- autoplot(roc_curve(train_probs, obs, .pred_TRUE))
 roc_auc_train <- train_probs %>%
   roc_auc(obs, .pred_TRUE)
 
+pr_auc_train <- train_probs %>%
+  pr_auc(obs, .pred_TRUE)
+
+pr_auc_train
+
+pr_curve_train <- autoplot(pr_curve(train_probs, obs, .pred_TRUE))
+
 roc_auc_train$type <- "ALL"
 
 roc_auc_train_type <- train_probs %>%
@@ -94,10 +101,6 @@ roc_plot_type <- roc_auc_train_type %>%
   geom_bar(stat="identity") + 
   coord_flip()
 
-roc_auc_train <- train_probs %>%
-  roc_auc(obs, .pred_TRUE)
-
-roc_auc_train
 
 ## @knitr correlation
 
@@ -164,6 +167,16 @@ roc_auc_test <- test_probs %>%
   roc_auc(obs, .pred_TRUE)
 
 roc_auc_test
+
+
+pr_auc_test <- test_probs %>%
+  pr_auc(obs, .pred_TRUE)
+
+pr_auc_test
+
+pr_curve_test <- autoplot(pr_curve(test_probs, obs, .pred_TRUE))
+
+pr_curve_test
 
 ## @knitr correlation testset
 
