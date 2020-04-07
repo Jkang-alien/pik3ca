@@ -90,7 +90,9 @@ hist <- clinical %>%
   rename(ID = "bcr_patient_barcode")
 
 dataset <- inner_join(hist, dataLV, by = "ID" )
-dataset$variant <- factor(dataset$variant)
+dataset$variant <- factor(dataset$variant,
+                          levels = c(TRUE, FALSE),
+                          labels = c('Mutant', 'Wild'))
 dataset$type <- factor(dataset$type)
 
 sum(is.na(dataset))
@@ -118,12 +120,26 @@ rec <- recipe(variant ~ ., data = trainset) %>%
   step_YeoJohnson(all_numeric()) %>%
   step_center(all_numeric()) %>%
   step_scale(all_numeric()) %>%
-  step_dummy(type)#%>%
+  step_dummy(type) #%>%
   #step_downsample(variant)
 
 wfl <- 
   workflow() %>%
   add_recipe(rec) %>%
+  add_model(mod)
+
+rec_down <- recipe(variant ~ ., data = trainset) %>%
+  update_role(ID, new_role = "id variable") %>%
+  #step_knnimpute(all_numeric()) %>%
+  step_YeoJohnson(all_numeric()) %>%
+  step_center(all_numeric()) %>%
+  step_scale(all_numeric()) %>%
+  step_dummy(type) %>%
+  step_downsample(variant)
+
+wfl_down <- 
+  workflow() %>%
+  add_recipe(rec_down) %>%
   add_model(mod)
 
 glmn_set <- parameters(penalty(range = c(-5,2), trans = log10_trans()),
@@ -132,7 +148,7 @@ glmn_set <- parameters(penalty(range = c(-5,2), trans = log10_trans()),
 glmn_grid <- 
   grid_regular(glmn_set, levels = c(8, 5))
 
-ctrl <- control_grid(save_pred = FALSE, verbose = TRUE)
+ctrl <- control_grid(save_pred = TRUE, verbose = TRUE)
 
 ## @knitr fitting
 
@@ -142,18 +158,28 @@ glmn_tune <-
             grid = glmn_grid,
             metrics = metric_set(roc_auc, pr_auc),
             control = ctrl)
+glmn_tune_down <- 
+  tune_grid(wfl_down,
+            resamples = cv_splits,
+            grid = glmn_grid,
+            metrics = metric_set(roc_auc, pr_auc),
+            control = ctrl)
 
 save(glmn_tune, file = "glmn_tune_pancancer.RData")
+save(glmn_tune_down, file = "glmn_tune_pancancer_down.RData")
 load("glmn_tune_pancancer.RData")
 
 glmn_tune_tidy <- glmn_tune %>%
   select(-splits)
 
-show_best(glmn_tune, metric = "roc_auc")
-show_best(glmn_tune, metric = "pr_auc")
+best_roc_downsample <- show_best(glmn_tune_down, metric = "roc_auc")
+best_pr_downsample <- show_best(glmn_tune_down, metric = "pr_auc")
+
+best_roc <- show_best(glmn_tune, metric = "roc_auc")
+best_pr <- show_best(glmn_tune, metric = "pr_auc")
 
 lasso_glmn <- show_best(glmn_tune)[4,1:2]
-best_glmn <- select_best(glmn_tune, metric = "roc_auc")
+best_glmn <- select_best(glmn_tune, metric = "pr_auc")
 mix <- show_best(glmn_tune)[3,1:2]
 
 ## @knitr Finalize_model
