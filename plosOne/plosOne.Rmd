@@ -5,10 +5,7 @@ author:
     email: jkang.alien@gmail.com
     affiliation: Department of Hospital Pathology, Seoul St. Mary’s Hospital, College of Medicine, The Catholic University of Korea, Seoul, South Korea
     corresponding: jkang.alien@gmail.com
-
 abstract: |
-  
-  
 bibliography: mybibfile.bib
 output: rticles::plos_article
 csl: plos.csl
@@ -116,7 +113,7 @@ Case imbalance
 
 Comparison with other studies where inconsistencies are discussed  
 
-
+PIK3CA prediction model performed better than RAS activation prediction model in terms of AUROC. The overall AUPR was     
 
 Conclusions comments on possible biological or clinical implications and suggestions for further research.  
 Evaluate the results - not the authors

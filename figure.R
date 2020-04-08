@@ -52,18 +52,21 @@ cor_PR <- pr_test_trainPlot +
   scale_colour_Publication() +
   theme_Publication()
 
-mutationROC <- mutatioPlot +
+mutationROC <- mutatioPlotTest +
   labs(title = "AUROC",
        x = "Mutation rate",
        y = "ROC") +
   scale_colour_Publication() +
   theme_Publication()
 
-mutationPR <- mutatioPlotPR +
+mutationPR <- mutatioPlotPRTest +
   labs(title = "AUPR",
        x = "Mutation rate",
        y = "PR") +
+  scale_x_continuous(limits = c(0, 0.6)) +
+  scale_y_continuous(limits = c(0, 0.6)) +
   scale_colour_Publication() +
+  geom_abline(slope = 1, intercept = 0, color = 3) +
   theme_Publication()
 
 geneCoeff <- coeffPlot +

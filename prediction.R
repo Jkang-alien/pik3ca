@@ -162,6 +162,39 @@ mutatioPlotPR <- mutationRatePR %>%
   geom_smooth(method='lm', formula= y~x) +
   ggrepel::geom_text_repel(data = mutationRatePR, aes(label = type))
 
+## @knitr testset
+
+mutationRateTest <- testset %>%
+  select(type, variant) %>%
+  group_by(type) %>%
+  count(variant == "Mutant") %>%
+  rename(variant = 'variant == "Mutant"') %>%
+  spread(variant, n) %>%
+  mutate(rate = `TRUE`/(`TRUE`+`FALSE`)) %>%
+  bind_cols(roc_auc_test_type)
+
+mutatioPlotTest <- mutationRateTest %>%
+  ggplot(aes(x=rate, y=.estimate)) +
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x) +
+  ggrepel::geom_text_repel(data = mutationRateTest, aes(label = type))
+
+
+mutationRatePRTest <- testset %>%
+  select(type, variant) %>%
+  group_by(type) %>%
+  count(variant == "Mutant") %>%
+  rename(variant = 'variant == "Mutant"') %>%
+  spread(variant, n) %>%
+  mutate(rate = `TRUE`/(`TRUE`+`FALSE`)) %>%
+  bind_cols(pr_auc_test_type)
+
+mutatioPlotPRTest <- mutationRatePRTest %>%
+  ggplot(aes(x=rate, y=.estimate)) +
+  geom_point() +
+  #geom_smooth(method='lm', formula= y~x) +
+  ggrepel::geom_text_repel(data = mutationRatePRTest, aes(label = type))
+
 ## @knitr testset_prediction
 
 test_probs <- 

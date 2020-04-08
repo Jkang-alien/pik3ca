@@ -207,15 +207,6 @@ Medicine, The Catholic University of Korea, Seoul, South Korea}}\textsuperscript
 * Corresponding author: jkang.alien@gmail.com\\
 \end{flushleft}
 % Please keep the abstract below 300 words
-\section*{Abstract}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur eget
-porta erat. Morbi consectetur est vel gravida pretium. Suspendisse ut
-dui eu ante cursus gravida non sed sem. Nullam sapien tellus, commodo id
-velit id, eleifend volutpat quam. Phasellus mauris velit, dapibus
-finibus elementum vel, pulvinar non tellus. Nunc pellentesque pretium
-diam, quis maximus dolor faucibus id. Nunc convallis sodales ante, ut
-ullamcorper est egestas vitae. Nam sit amet enim ultrices, ultrices elit
-pulvinar, volutpat risus.
 
 % Please keep the Author Summary between 150 and 200 words
 % Use first person. PLOS ONE authors please skip this step.
@@ -349,6 +340,9 @@ The model showed best performance at lambda = 0.01 and alpha = 1.0
 \hypertarget{prediction-performance}{%
 \subsection{Prediction performance}\label{prediction-performance}}
 
+The trainset AUROC was 0.93 and the testset AUROC was 0.84. The AUPR of
+trainset was 0.74 and the testset AUPR was 0.771.
+
 \hypertarget{performance-of-each-cancer-type}{%
 \subsection{performance of each cancer
 type}\label{performance-of-each-cancer-type}}
@@ -393,13 +387,46 @@ Conclusions comments on possible biological or clinical implications and
 suggestions for further research.\\
 Evaluate the results - not the authors
 
+\hypertarget{figure-legends}{%
+\section{Figure legends}\label{figure-legends}}
+
+Figure 1. Summary of modeling results
+
+\begin{enumerate}
+\def\labelenumi{(\Alph{enumi})}
+\tightlist
+\item
+  Left: receiver operating characteristic (ROC) curve right: precision
+  recall (PR) curve of trainset and testset. The horizontal green line
+  is the PIK3CA mutation rate (0.11) (B) Correlation between trainset
+  and testset of area under receiver operating characteristic curve
+  (AUROC) and area under precision recall curve (AUPR) among cancer
+  type. The abbreviations are explained in S1 appendix. (C) Correlation
+  between the PIK3CA mutation rate of area under receiver operating
+  characteristic curve (AUROC) and area under precision recall curve
+  (AUPR).
+\end{enumerate}
+
+Figure 2. Coefficients of model
+
+\begin{enumerate}
+\def\labelenumi{(\Alph{enumi})}
+\tightlist
+\item
+  Top 30 high coefficients of mRNA. (B) Coefficients of cancer types.
+  The abbreviations are explained in S1 appendix.
+\end{enumerate}
+
+\hypertarget{supporting-information}{%
+\section{Supporting information}\label{supporting-information}}
+
+S1 Appendix. S2 Figure. S1 Table.\\
+S2 Table.\\
+S3 Table.
+
 \hypertarget{references}{%
 \section*{References}\label{references}}
 \addcontentsline{toc}{section}{References}
-
-\hypertarget{figure-legends}{%
-\section*{Figure legends}\label{figure-legends}}
-\addcontentsline{toc}{section}{Figure legends}
 
 \hypertarget{refs}{}
 \leavevmode\hypertarget{ref-andre_2019_alpelisib_nengljmeda}{}%
