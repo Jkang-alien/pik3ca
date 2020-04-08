@@ -23,6 +23,7 @@ ROCPlot <- bind_rows("Trainset" = train_probs,
   
 
 
+
 prPlot <-  bind_rows("Trainset" = train_probs,
                      "Testset" = test_probs,
                      .id = "dataset") %>%
@@ -37,10 +38,64 @@ prPlot <-  bind_rows("Trainset" = train_probs,
   scale_colour_Publication() +
   theme_Publication()
 
+cor_ROC <- roc_test_trainPlot +
+  labs(title = "AUROC",
+       x = "Trainset",
+       y = "Testset") +
+  scale_colour_Publication() +
+  theme_Publication()
+
+cor_PR <- pr_test_trainPlot +
+  labs(title = "AUPR",
+       x = "Trainset",
+       y = "Testset") +
+  scale_colour_Publication() +
+  theme_Publication()
+
+mutationROC <- mutatioPlot +
+  labs(title = "AUROC",
+       x = "Mutation rate",
+       y = "ROC") +
+  scale_colour_Publication() +
+  theme_Publication()
+
+mutationPR <- mutatioPlotPR +
+  labs(title = "AUPR",
+       x = "Mutation rate",
+       y = "PR") +
+  scale_colour_Publication() +
+  theme_Publication()
+
+geneCoeff <- coeffPlot +
+  labs(title = "Coefficiency of genes",
+       x = "Coefficiency",
+       y = "Gene") +
+  scale_colour_Publication() +
+  theme_Publication()
+
+typeCoeff <- typePlot +
+  labs(title = "Coefficiency of cancer type",
+       x = "Coefficiency",
+       y = "Cancer type") +
+  scale_colour_Publication() +
+  theme_Publication()
+
+
 CairoPDF(file = 'Figure1',
-         width = 6, height = 3)
-grid.arrange(ROCPlot, prPlot, nrow = 1)
+         width = 8, height = 12, pointsize=10)
+grid.arrange(ROCPlot, prPlot,
+             cor_ROC, cor_PR,
+             mutationROC, mutationPR,
+             nrow = 3)
 dev.off()
+
+CairoPDF(file = 'Figure2',
+         width = 8, height = 12)
+grid.arrange(geneCoeff, typeCoeff,
+             nrow = 1)
+dev.off()
+
+
 
 typePlot +
   labs(title = "Coefficiency of cancer type",
@@ -48,19 +103,3 @@ typePlot +
        y = "Cancer type") +
   scale_colour_Publication() +
   theme_Publication()
-
-### Train_test ROC 
-
-Train_test_ROC <- test_trainPlot +
-  labs(title = "AUROC of trainset and testset",
-       x = "Trainset",
-       y = "Testset") +
-  scale_colour_Publication() +
-  theme_Publication()
-  
-bind_rows("Trainset" = train_probs,
-          "Testset" = test_probs,
-          .id = "dataset") %>%
-  skimr::skim()
-  
-
