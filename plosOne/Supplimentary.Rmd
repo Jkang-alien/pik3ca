@@ -1,9 +1,0 @@
----
-title: "Supplimentary"
-author: "JK"
-date: '2020 4 3 '
-output: html_document
----
-
-Pancancer TCGA RNA data: http://api.gdc.cancer.gov/data/3586c0da-64d0-4b74-a449-5ff4d9136611
-

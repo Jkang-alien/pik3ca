@@ -1,0 +1,21 @@
+---
+title: "Supplimentary"
+author: "JK"
+date: '2020 4 3 '
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+Data repository
+
+Pancancer TCGA RNA data: http://api.gdc.cancer.gov/data/3586c0da-64d0-4b74-a449-5ff4d9136611
+
+```{r TCGA abbreviations}
+library(tidyverse)
+
+read_delim("../TCGAAbbreviations.txt", delim = "\t") %>%
+  knitr::kable()
+
+```
