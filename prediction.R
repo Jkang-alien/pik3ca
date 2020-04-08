@@ -196,76 +196,33 @@ pr_curve_test_down <- autoplot(pr_curve(test_probs_down, obs, .pred_Mutant))
 
 pr_curve_test
 
-roc_auc_test$type <- "ALL"
+pr_auc_test$type <- "ALL"
 
-roc_auc_test_type <- test_probs %>%
+pr_auc_test_type <- test_probs %>%
   group_by(type) %>%
-  roc_auc(obs, .pred_TRUE) %>%
+  pr_auc(obs, .pred_Mutant) %>%
   mutate(type = as.character(type))
 
-roc_plot_test_type <- roc_auc_test_type %>%
-  bind_rows(roc_auc_test) %>%
+pr_plot_test_type <- pr_auc_test_type %>%
+  bind_rows(pr_auc_test) %>%
   filter(is.na(.estimate) == FALSE) %>%
   ggplot(aes(x=reorder(type, -.estimate), y=.estimate)) +
   geom_bar(stat="identity") + 
   coord_flip()
 
-roc_train_test <- merge(roc_auc_train_type,
-                        roc_auc_test_type,
-                        by = "type")
+pr_train_test <- merge(pr_auc_train_type,
+                       pr_auc_test_type,
+                       by = "type")
 
-test_trainPlot <- roc_train_test %>%
+pr_test_trainPlot <- pr_train_test %>%
   ggplot(aes(x=.estimate.x, y=.estimate.y)) +
   geom_point() +
   geom_smooth(method='lm', formula= y~x) +
-  ggrepel::geom_text_repel(data = roc_train_test,
+  ggrepel::geom_text_repel(data = pr_train_test,
                            aes(label = type))
 
-test_trainPlot
+pr_test_trainPlot
 
-
-roc_auc_test_type <- test_probs %>%
-  group_by(type) %>%
-  roc_auc(obs, .pred_TRUE) %>%
-  mutate(type = as.character(type))
-
-roc_plot_test_type <- roc_auc_test_type %>%
-  bind_rows(roc_auc_test) %>%
-  filter(is.na(.estimate) == FALSE) %>%
-  ggplot(aes(x=reorder(type, -.estimate), y=.estimate)) +
-  geom_bar(stat="identity") + 
-  coord_flip()
-
-roc_train_test <- merge(roc_auc_train_type,
-                        roc_auc_test_type,
-                        by = "type")
-
-
-test_train_prPlot <- roc_train_test %>%
-  ggplot(aes(x=.estimate.x, y=.estimate.y)) +
-  geom_point() +
-  geom_smooth(method='lm', formula= y~x) +
-  ggrepel::geom_text_repel(data = roc_train_test,
-                           aes(label = type))
-
-test_trainPlot
-
-roc_plot_test_type
-
-roc_auc_test <- test_probs %>%
-  roc_auc(obs, .pred_TRUE)
-
-roc_auc_test
-
-
-pr_auc_test <- test_probs %>%
-  pr_auc(obs, .pred_TRUE)
-
-pr_auc_test
-
-pr_curve_test <- autoplot(pr_curve(test_probs, obs, .pred_TRUE))
-
-pr_curve_test
 
 ## @knitr correlation testset
 

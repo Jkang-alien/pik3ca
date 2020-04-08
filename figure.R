@@ -12,9 +12,11 @@ ROCPlot <- bind_rows("Trainset" = train_probs,
           "Testset" = test_probs,
           .id = "dataset") %>%
   group_by(dataset) %>%
-  roc_curve(obs, .pred_TRUE) %>%
+  roc_curve(obs, .pred_Mutant) %>%
     ggplot(aes(x=1-specificity, y=sensitivity, color = dataset)) +
   geom_line() +
+  geom_text(aes(x=.6, y=.6, label = "AUROC = 0.93")) + 
+  geom_text(aes(x=.6, y=.4, label = "AUROC = 0.84"), color = "#386cb0") +
   labs(title = "ROC curve") +
   scale_colour_Publication() +
   theme_Publication()
@@ -25,9 +27,12 @@ prPlot <-  bind_rows("Trainset" = train_probs,
                      "Testset" = test_probs,
                      .id = "dataset") %>%
   group_by(dataset) %>%
-  pr_curve(obs, .pred_TRUE) %>%
+  pr_curve(obs, .pred_Mutant) %>%
   ggplot(aes(x=recall, y=precision, color = dataset)) +
   geom_line() +
+  geom_hline(yintercept = 0.11, color = 3)+
+  geom_text(aes(x=.7, y=1.0, label = "AUPR = 0.66")) + 
+  geom_text(aes(x=.7, y=.8, label = "AUPR = 0.39"), color = "#386cb0") +
   labs(title = "PR curve") +
   scale_colour_Publication() +
   theme_Publication()
@@ -53,3 +58,9 @@ Train_test_ROC <- test_trainPlot +
   scale_colour_Publication() +
   theme_Publication()
   
+bind_rows("Trainset" = train_probs,
+          "Testset" = test_probs,
+          .id = "dataset") %>%
+  skimr::skim()
+  
+
