@@ -79,10 +79,6 @@ The model showed best performance at lambda = 0.01 and alpha = 1.0 (Ridge regres
 
 The trainset AUROC was 0.93 and the testset AUROC was 0.84. The AUPR of trainset was 0.74 and the testset AUPR was 0.771. 
 
-```{r}
-load("../result.RData")
-```
-
 ## performance of each cancer type  
 
 ## Important predictors  
@@ -113,7 +109,7 @@ Case imbalance
 
 Comparison with other studies where inconsistencies are discussed  
 
-PIK3CA prediction model performed better than RAS activation prediction model in terms of AUROC. The overall AUPR was     
+PIK3CA prediction model performed better than RAS activation prediction model in terms of AUROC. AUPR and the PIK3CA mutation rate interpretation. @davis_2006_relationship_proc23rdintconfmachlearn      
 
 Conclusions comments on possible biological or clinical implications and suggestions for further research.  
 Evaluate the results - not the authors
