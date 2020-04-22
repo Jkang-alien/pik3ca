@@ -53,22 +53,18 @@ Prediction RAS pathway activation with gene expression data was done in previous
 
 ## Dataset
 
-We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr rpackage. Gene expression data was get from GDAC firehose using RTCGAToolbox R package. ER immunostain postive HER2 immunostain negative and/or SISH negative breast cancers are included. Data of invasive ductal carcinomas were used for training set and data of invasive lobular carcinoma were used for test set. Number of observations were 530 in training set and 188 in test set. 
-
-## Selecting variable for modeling  
-
-To narrow down potential predictors, Genes with a large the median absolute deviation (more than third-quartiles) were selected. 5000 out of 20502 genes were included in the modeling process.   
-
-## Preprocessing  
-
-Yeo-Johnson transformation was done to correct skewness. Centering and scaling were done. All preprocessing was done using recipe r package.  
+We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr rpackage.[@jacobsenCgdsrRbasedAPI2019] Gene expression data was get from GDAC firehose using RTCGAToolbox R package. [@samurRTCGAToolboxNewTool2014] ER immunostain postive HER2 immunostain negative and/or SISH negative breast cancers are included. Data of invasive ductal carcinomas were used for training set and data of invasive lobular carcinoma were used for test set. Number of observations were 530 in training set and 188 in test set.  
 
 ## Modeling  
 
-Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid: $\lambda$ {$10^{-5}$, $10^{-4}$,$10^{-3}$,$10^{-2}$,$10^{-1}$, $10^{0}$}, $\alpha$ {0.0, 0.25, 0.5, 0.75}. Model performance was evealuated with the area under receiver operating characteristic (ROC) and area under the ROC (AUROC) and precision recall (PR) and area under curve (AUPR).  
+To narrow down potential predictors, Genes with a large the median absolute deviation (more than third-quartiles) were selected. 5000 out of 20502 genes were included in the modeling process.   
+
+
+Yeo-Johnson transformation was done to correct skewness. Centering and scaling were done. All preprocessing was done using recipe r package. [@kuhnRecipesPreprocessingTools2020]    
+
+Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid: $\lambda$ {$10^{-5}$, $10^{-4}$,$10^{-3}$,$10^{-2}$,$10^{-1}$, $10^{0}$}, $\alpha$ {0.0, 0.25, 0.5, 0.75}. Model performance was evealuated with the area under receiver operating characteristic (ROC) and area under the ROC (AUROC) and precision recall (PR) and area under curve (AUPR). The modelin process was done with tidymodels rpackage.  [@kuhnTidymodelsEasilyInstall2020]   
 
 # Results
-
 
 ## selecting model 
 
@@ -77,11 +73,13 @@ The model showed best performance at lambda = 0.01 and alpha = 1.0 (Ridge regres
 
 ## Prediction performance  
 
-The trainset AUROC was 0.93 and the testset AUROC was 0.84. The AUPR of trainset was 0.74 and the testset AUPR was 0.771. 
+The trainset AUROC was 0.93 and the testset AUROC was 0.84. The AUPR of trainset was 0.66 and the testset AUPR was 0.39. (Figure 1A)  
 
 ## performance of each cancer type  
+Because tht prevalence of PIK3CA mutation is vary across the cancer type, the performance of each cancer type was investigated. The AUROC and AUPR were positively correlated between train set and test set in cancer type subanalysis. (Figure 1B) The AUPR was high in cancer type with high PIK3CA mutation rate such as colon, brest, Uterus cancer types. The AUROC did not correlated with PIK3CA mutation rate of each cancer types. (Figure 1C)  
 
 ## Important predictors  
+
 
 
 # Discussion
@@ -118,7 +116,7 @@ Evaluate the results - not the authors
 
 Figure 1. Summary of modeling results  
 
-(A) Left: receiver operating characteristic (ROC) curve right: precision recall (PR) curve of trainset and testset. The horizontal green line is the PIK3CA mutation rate (0.11)  (B) Correlation between trainset and testset of area under receiver operating characteristic curve (AUROC) and area under precision recall curve (AUPR) among cancer type. The abbreviations are explained in S1 appendix. (C) Correlation between the PIK3CA mutation rate of area under receiver operating characteristic curve (AUROC) and area under precision recall curve (AUPR).  
+(A) Left: receiver operating characteristic (ROC) curve right: precision recall (PR) curve of trainset and testset. The horizontal green line is the PIK3CA mutation rate (0.11)  (B) Correlation between trainset and testset of area under receiver operating characteristic curve (AUROC) and area under precision recall curve (AUPR) among cancer type. The abbreviations are explained in S1 appendix. (C) Correlation between the PIK3CA mutation rate of area under receiver operating characteristic curve (AUROC) and area under precision recall curve (AUPR).   
 
 Figure 2. Coefficients of model  
 
@@ -126,11 +124,11 @@ Figure 2. Coefficients of model
 
 # Supporting information
 
-S1 Appendix. 
-S2 Figure.
+S1 Appendix.  
+S2 Figure.  
 S1 Table.  
 S2 Table.  
-S3 Table. 
+S3 Table.  
 
 # References {#references .unnumbered}
 

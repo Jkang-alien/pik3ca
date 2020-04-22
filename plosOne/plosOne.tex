@@ -294,29 +294,23 @@ curve. We applied their modeling methods in prediction PIK3CA mutation.
 \subsection{Dataset}\label{dataset}}
 
 We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr
-rpackage. Gene expression data was get from GDAC firehose using
-RTCGAToolbox R package. ER immunostain postive HER2 immunostain negative
-and/or SISH negative breast cancers are included. Data of invasive
-ductal carcinomas were used for training set and data of invasive
-lobular carcinoma were used for test set. Number of observations were
-530 in training set and 188 in test set.
+rpackage.{[}3{]} Gene expression data was get from GDAC firehose using
+RTCGAToolbox R package. {[}4{]} ER immunostain postive HER2 immunostain
+negative and/or SISH negative breast cancers are included. Data of
+invasive ductal carcinomas were used for training set and data of
+invasive lobular carcinoma were used for test set. Number of
+observations were 530 in training set and 188 in test set.
 
-\hypertarget{selecting-variable-for-modeling}{%
-\subsection{Selecting variable for
-modeling}\label{selecting-variable-for-modeling}}
+\hypertarget{modeling}{%
+\subsection{Modeling}\label{modeling}}
 
 To narrow down potential predictors, Genes with a large the median
 absolute deviation (more than third-quartiles) were selected. 5000 out
 of 20502 genes were included in the modeling process.
 
-\hypertarget{preprocessing}{%
-\subsection{Preprocessing}\label{preprocessing}}
-
 Yeo-Johnson transformation was done to correct skewness. Centering and
 scaling were done. All preprocessing was done using recipe r package.
-
-\hypertarget{modeling}{%
-\subsection{Modeling}\label{modeling}}
+{[}5{]}
 
 Penalized logistic regression was applied to prediction modeling.
 10-fold cross-validation with targe variable stratification was done
@@ -325,7 +319,7 @@ over the hyperparameter grid: \(\lambda\) \{\(10^{-5}\),
 \(\alpha\) \{0.0, 0.25, 0.5, 0.75\}. Model performance was evealuated
 with the area under receiver operating characteristic (ROC) and area
 under the ROC (AUROC) and precision recall (PR) and area under curve
-(AUPR).
+(AUPR). The modelin process was done with tidymodels rpackage. {[}6{]}
 
 \hypertarget{results}{%
 \section{Results}\label{results}}
@@ -341,11 +335,19 @@ The model showed best performance at lambda = 0.01 and alpha = 1.0
 \subsection{Prediction performance}\label{prediction-performance}}
 
 The trainset AUROC was 0.93 and the testset AUROC was 0.84. The AUPR of
-trainset was 0.74 and the testset AUPR was 0.771.
+trainset was 0.66 and the testset AUPR was 0.39. (Figure 1A)
 
 \hypertarget{performance-of-each-cancer-type}{%
 \subsection{performance of each cancer
 type}\label{performance-of-each-cancer-type}}
+
+Because tht prevalence of PIK3CA mutation is vary across the cancer
+type, the performance of each cancer type was investigated. The AUROC
+and AUPR were positively correlated between train set and test set in
+cancer type subanalysis. (Figure 1B) The AUPR was high in cancer type
+with high PIK3CA mutation rate such as colon, brest, Uterus cancer
+types. The AUROC did not correlated with PIK3CA mutation rate of each
+cancer types. (Figure 1C)
 
 \hypertarget{important-predictors}{%
 \subsection{Important predictors}\label{important-predictors}}
@@ -385,7 +387,7 @@ Comparison with other studies where inconsistencies are discussed
 
 PIK3CA prediction model performed better than RAS activation prediction
 model in terms of AUROC. AUPR and the PIK3CA mutation rate
-interpretation. {[}3{]}
+interpretation. {[}7{]}
 
 Conclusions comments on possible biological or clinical implications and
 suggestions for further research.\\
@@ -424,7 +426,9 @@ Figure 2. Coefficients of model
 \hypertarget{supporting-information}{%
 \section{Supporting information}\label{supporting-information}}
 
-S1 Appendix. S2 Figure. S1 Table.\\
+S1 Appendix.\\
+S2 Figure.\\
+S1 Table.\\
 S2 Table.\\
 S3 Table.
 
@@ -446,8 +450,24 @@ Machine Learning Detects Pan-cancer Ras Pathway Activation in The Cancer
 Genome Atlas. Cell Reports. Elsevier; 2018;23: 172--180.e3.
 doi:\href{https://doi.org/10.1016/j.celrep.2018.03.046}{10.1016/j.celrep.2018.03.046}
 
+\leavevmode\hypertarget{ref-jacobsenCgdsrRbasedAPI2019}{}%
+3. Jacobsen A, Luna A. Cgdsr: R-based API for accessing the MSKCC cancer
+genomics data server (CGDS). 2019.
+
+\leavevmode\hypertarget{ref-samurRTCGAToolboxNewTool2014}{}%
+4. Samur MK. RTCGAToolbox: A new tool for exporting TCGA Firehose data.
+PLoS One. 2014;9(9):e106397.
+
+\leavevmode\hypertarget{ref-kuhnRecipesPreprocessingTools2020}{}%
+5. Kuhn M, Wickham H. Recipes: Preprocessing tools to create design
+matrices. 2020.
+
+\leavevmode\hypertarget{ref-kuhnTidymodelsEasilyInstall2020}{}%
+6. Kuhn M, Wickham H. Tidymodels: Easily install and load the
+'tidymodels' packages. 2020.
+
 \leavevmode\hypertarget{ref-davis_2006_relationship_proc23rdintconfmachlearn}{}%
-3. Davis J, Goadrich M. The relationship between Precision-Recall and
+7. Davis J, Goadrich M. The relationship between Precision-Recall and
 ROC curves. Proceedings of the 23rd international conference on Machine
 learning. Pittsburgh, Pennsylvania, USA: Association for Computing
 Machinery; 2006. pp. 233--240.
