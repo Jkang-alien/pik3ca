@@ -297,11 +297,7 @@ curve. We applied their modeling methods in prediction PIK3CA mutation.
 
 We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr
 rpackage.{[}3{]} Gene expression data was get from GDAC firehose using
-RTCGAToolbox R package. {[}4{]} ER immunostain postive HER2 immunostain
-negative and/or SISH negative breast cancers are included. Data of
-invasive ductal carcinomas were used for training set and data of
-invasive lobular carcinoma were used for test set. Number of
-observations were 530 in training set and 188 in test set.
+RTCGAToolbox R package. {[}4{]}
 
 \hypertarget{modeling}{%
 \subsection{Modeling}\label{modeling}}
@@ -315,23 +311,25 @@ Penalized logistic regression was applied to prediction modeling.
 10-fold cross-validation with targe variable stratification was done
 over the hyperparameter grid: \(\lambda\) \{\(10^{-5}\),
 \(10^{-4}\),\(10^{-3}\),\(10^{-2}\),\(10^{-1}\), \(10^{0}\)\},
-\(\alpha\) \{0.0, 0.25, 0.5, 0.75\}. Model performance was evealuated
-with the area under receiver operating characteristic (ROC) and area
-under the ROC (AUROC) and precision recall (PR) and area under curve
-(AUPR). The modelin process was done with tidymodels rpackage. {[}6{]}
+\(\alpha\) \{0.0, 0.25, 0.5, 0.75\}. Lambda is penalty scaling parameter
+and alpha is mixing parameter of penalty function
+(\((1-\alpha)/2 \lVert\beta\rVert_2^2+\alpha\lVert \beta \rVert_1\)).
+Model performance was evealuated with the area under receiver operating
+characteristic (ROC) and area under the ROC (AUROC) and precision recall
+(PR) and area under curve (AUPR). The modelin process was done with
+tidymodels rpackage. {[}6{]}
 
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
-\hypertarget{selecting-model}{%
-\subsection{Selecting model}\label{selecting-model}}
+\hypertarget{selecting-model-and-performance-estimation}{%
+\subsection{Selecting model and performance
+estimation}\label{selecting-model-and-performance-estimation}}
 
-Cross-validation\\
-The model showed best performance at lambda = 0.01 and alpha = 1.0
-(Ridge regression).
-
-\hypertarget{prediction-performance}{%
-\subsection{Prediction performance}\label{prediction-performance}}
+In 10-fold cross-validation, the model with lambda = 0.01 and alpha =
+1.0 (Ridge regression) were best performance in terms of AUROC. The
+final model was trained with the selected hyperparameters with all
+trainset.
 
 The trainset AUROC was 0.93 and the testset AUROC was 0.84. The AUPR of
 trainset was 0.66 and the testset AUPR was 0.39. (Figure 1A)
@@ -402,15 +400,29 @@ The AUPR is more informative than AUROC on imbalaced datasets. {[}7{]}
   Evaluate the results - not the authors
 \end{itemize}
 
-PIK3CA prediction model performed better than RAS activation prediction
-model in terms of AUROC. AUPR and the PIK3CA mutation rate
-interpretation. {[}7{]}
+Our PIK3CA prediction model performed better than RAS activation
+prediction model of previous study in terms of both AUROC (0.84 vs 0.75)
+and AUPR (0.39 vs 0.24) on testset prediction. Our testset is
+corresponding to the samples initially filtered from training. The
+target variable of our study is more specific than the previous study.
+The specific important mutations can effect stronger downsteam gene
+expression than the broad events pathway activation. The previous study
+might be more difficult prediction problum.
+
+OUr model includes cancer type predictor and they are stronger than gene
+expression data. The varing prevalence of PIC3CA mutation across cancer
+type might reason of the strong cancer type predictor. If the cancer
+type was wrong or can not be determined, our model performance can be
+poor.
 
 \begin{itemize}
-\tightlist
 \item
   Conclusions comments on possible biological or clinical implications
   and suggestions for further research.
+\item
+  Proof of concept study\\
+\item
+  Reproducibility of gene expression prediction model
 \end{itemize}
 
 \hypertarget{figure-legends}{%
