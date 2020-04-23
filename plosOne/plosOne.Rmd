@@ -53,12 +53,20 @@ Prediction RAS pathway activation with gene expression data was done in previous
 ## Dataset
 
 We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr rpackage.[@jacobsenCgdsrRbasedAPI2019] Gene expression data was get from GDAC firehose using RTCGAToolbox R package. [@samurRTCGAToolboxNewTool2014]    
+ 
+10845 cases were available both PIK3CA mutation and mRNAD expression data. 5128 out of 20502 genes were included in the modeling process after filtering with median absolute deviation as described at modelinf process method. 33 cancer type dummy variables were included in predictor variables. 
 
-## Modeling  
+The target variable was PIK3CA mutation status. The status of  PIK3CA was considered as positive when the case has following PIK3CA variants which is the target variables of the therascreen PIK3CA RGQ PCR Kit; C420R, E542K, E545A, E545D, E545G, E545K, Q546E, Q546R, H1047L, H1047R, H1047Y. The therascreen PIK3CA RGQ PCR Kit was approved by U.S. Food and Drug adminidtration for PIK3CA inhibitor. We splited the three quarters of dataset for the trainset and one quarter for testset. 
 
-To narrow down potential predictors, Genes with a large the median absolute deviation (more than third-quartiles) were selected. 5000 out of 20502 genes were included in the modeling process. Yeo-Johnson transformation was done to correct skewness. Centering and scaling were done. All preprocessing was done using recipe r package. [@kuhnRecipesPreprocessingTools2020] Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid: $\lambda$ {$10^{-5}$, $10^{-4}$,$10^{-3}$,$10^{-2}$,$10^{-1}$, $10^{0}$}, $\alpha$ {0.0, 0.25, 0.5, 0.75}. Lambda is  penalty scaling parameter and alpha is mixing parameter of penalty function ($(1-\alpha)/2 \lVert\beta\rVert_2^2+\alpha\lVert \beta \rVert_1$). [@friedmanRegularizationPathsGeneralized2010] Model performance was evealuated with the area under receiver operating characteristic (ROC) and area under the ROC (AUROC) and precision recall (PR) and area under curve (AUPR). The modelin process was done with tidymodels rpackage.  [@kuhnTidymodelsEasilyInstall2020]   
+## Modeling process  
+
+To narrow down potential predictors, Genes with a large the median absolute deviation (more than third-quartiles) were selected.  Yeo-Johnson transformation was done to correct skewness. Centering and scaling were done. All preprocessing was done using recipe r package. [@kuhnRecipesPreprocessingTools2020] Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid: $\lambda$ {$10^{-5}$, $10^{-4}$,$10^{-3}$,$10^{-2}$,$10^{-1}$, $10^{0}$}, $\alpha$ {0.0, 0.25, 0.5, 0.75}. Lambda is  penalty scaling parameter and alpha is mixing parameter of penalty function ($(1-\alpha)/2 \lVert\beta\rVert_2^2+\alpha\lVert \beta \rVert_1$). [@friedmanRegularizationPathsGeneralized2010] Model performance was evealuated with the area under receiver operating characteristic (ROC) and area under the ROC (AUROC) and precision recall (PR) and area under curve (AUPR). The modelin process was done with tidymodels rpackage.  [@kuhnTidymodelsEasilyInstall2020]   
 
 # Results
+
+## Dataset summary 
+- PIK3CA prevalence
+- 
 
 ## Selecting model and performance estimation
 
@@ -72,7 +80,7 @@ Because tht prevalence of PIK3CA mutation is vary across the cancer type, the pe
 
 ## Important predictors  
 
-Figure 2 shows top 30 important predictors. IGF1R mRNA expression was the strongest negative predictor and PTEN was the strongest positive predictor. Both genes and PIK3CA are key players in tyrosin kanase pathway. The cancer type was important predictors. Some cancer types including uterine carcinosarcoma (UCS), bladder urothelial carcinoma (BLCA), pancreatic adenocarcinoma (PAAD), lymphoid neoplasm diffuse large B-cell lymphoma (DLBC) are strongest predictors. 
+Figure 2 shows top 30 important predictors. The coefficient is the parameter of the predictor which represent the effect of the predictor on prediction. IGF1R mRNA expression was the strongest negative predictor and PTEN was the strongest positive predictor. Both genes and PIK3CA are key players in tyrosin kanase pathway. The cancer type was important predictors. Some cancer types including uterine carcinosarcoma (UCS), bladder urothelial carcinoma (BLCA), pancreatic adenocarcinoma (PAAD), lymphoid neoplasm diffuse large B-cell lymphoma (DLBC) are strongest predictors. 
 
 # Discussion
 

@@ -1,13 +1,47 @@
 load('result.RData')
-
+load('dataset.RData')
 library(Cairo)
 library(tidyverse)
 library(tidymodels)
 library(gridExtra)
 
 source("theme_publication.R")
+### PIK3CA prevalence across cancer type
+prevalancePlot <- dataset %>%
+  select(variant, type) %>%
+  group_by(type) %>%
+  count(variant) %>%
+  spread(variant, n) %>%
+  replace_na(list(Mutant=0)) %>%
+  mutate(prevalance = Mutant/(Mutant + Wild)) %>%
+  ggplot(aes(x=reorder(type, -prevalance), y=prevalance)) +
+  geom_bar(stat = "identity") +
+  coord_flip() + 
+  theme_Publication() +
+  labs(title = "PIK3CA Prevalance",
+       x = "Prevalance",
+       y = "Cancer type")
 
+CairoPDF(file = 'Figure1',
+         width = 4, height = 6, pointsize=8)
+dataset %>%
+  select(variant, type) %>%
+  group_by(type) %>%
+  count(variant) %>%
+  spread(variant, n) %>%
+  replace_na(list(Mutant=0)) %>%
+  mutate(prevalance = Mutant/(Mutant + Wild)) %>%
+  ggplot(aes(x=reorder(type, -prevalance), y=prevalance)) +
+  geom_bar(stat = "identity") +
+  coord_flip() + 
+  theme_Publication() +
+  labs(title = "PIK3CA Prevalance",
+       x = "Prevalance",
+       y = "Cancer type")
+
+dev.off()
 ### ROC PR Plots
+  
 ROCPlot <- bind_rows("Trainset" = train_probs,
           "Testset" = test_probs,
           .id = "dataset") %>%
@@ -21,9 +55,6 @@ ROCPlot <- bind_rows("Trainset" = train_probs,
   scale_colour_Publication() +
   theme_Publication()
   
-
-
-
 prPlot <-  bind_rows("Trainset" = train_probs,
                      "Testset" = test_probs,
                      .id = "dataset") %>%
@@ -84,7 +115,7 @@ typeCoeff <- typePlot +
   theme_Publication()
 
 
-CairoPDF(file = 'Figure1',
+CairoPDF(file = 'Figure2',
          width = 8, height = 12, pointsize=10)
 grid.arrange(ROCPlot, prPlot,
              cor_ROC, cor_PR,
@@ -92,7 +123,7 @@ grid.arrange(ROCPlot, prPlot,
              nrow = 3)
 dev.off()
 
-CairoPDF(file = 'Figure2',
+CairoPDF(file = 'Figure3',
          width = 8, height = 12)
 grid.arrange(geneCoeff, typeCoeff,
              nrow = 1)
