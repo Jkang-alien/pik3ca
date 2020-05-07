@@ -7,20 +7,6 @@ library(gridExtra)
 
 source("theme_publication.R")
 ### PIK3CA prevalence across cancer type
-prevalancePlot <- dataset %>%
-  select(variant, type) %>%
-  group_by(type) %>%
-  count(variant) %>%
-  spread(variant, n) %>%
-  replace_na(list(Mutant=0)) %>%
-  mutate(prevalance = Mutant/(Mutant + Wild)) %>%
-  ggplot(aes(x=reorder(type, -prevalance), y=prevalance)) +
-  geom_bar(stat = "identity") +
-  coord_flip() + 
-  theme_Publication() +
-  labs(title = "PIK3CA Prevalance",
-       x = "Prevalance",
-       y = "Cancer type")
 
 CairoPDF(file = 'Figure1',
          width = 4, height = 6, pointsize=8)
@@ -33,13 +19,25 @@ dataset %>%
   mutate(prevalance = Mutant/(Mutant + Wild)) %>%
   ggplot(aes(x=reorder(type, -prevalance), y=prevalance)) +
   geom_bar(stat = "identity") +
-  coord_flip() + 
-  theme_Publication() +
+  coord_flip() +
+  theme_Publication() + 
   labs(title = "PIK3CA Prevalance",
        x = "Prevalance",
-       y = "Cancer type")
-
+       y = "Cancer type") 
 dev.off()
+## Prevalence of PIK3CA 
+
+
+dfPrevalance <- dataset %>%
+  select(variant, type) %>%
+  group_by(type) %>%
+  count(variant) %>%
+  spread(variant, n) %>%
+  replace_na(list(Mutant=0)) %>%
+  mutate(prevalance = Mutant/(Mutant + Wild))
+
+summary(dfPrevalance$prevalance)
+summary(dataset$variant)
 ### ROC PR Plots
   
 ROCPlot <- bind_rows("Trainset" = train_probs,

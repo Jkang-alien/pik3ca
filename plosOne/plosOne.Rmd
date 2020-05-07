@@ -24,29 +24,16 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 
 - The problem  
   * PIK3CA mutation in selecting drug  
+  
+Targeted thrapy becomes standard treatment in many cancer patients. To treat with the targeted therapy, the The patients should be confirmed the indicated genomic alterations in their cancer. Many direct test for the genomic alteration has been developed and prooved for their clical utility to discriminate which patients will be response the targeted therapy. 
 
-Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in hormone receptor positive HER2 negative subtype. @andre_2019_alpelisib_nengljmeda Prediction of PIK3CA mutation was done by gene expression data of TCGA. 
+The machine learning approach has been actively researched recently to detect the genomic alterations. The machine learning can build a prediction model from a large number of predictors such as radiolomic features @dercleIdentificationNonSmall2020, pathology image or gene expression data @wayMachineLearningDetects2018. The machine learning approach has limitations to apply to clinical practice. However the machine learning prediction can be a second best when the direct test fails.    
 
-- Predicting mutation by gene expression data
-  * What for?  
-  * Feasible?  
-  * Cost?  
+PIK3CA is encodes the p110$\alpha$ catalytic subunit of phosphatidylinositol 3′-kinase (PI3K). PI3K is a protein kinase which phosphorylates phosphatidylinositol 4,5-biphosphate (PIP~2~) to make phosphatidylinositol 3,4,5-triphosphate (PIP~3~). Phosphatase and tensin homolog (PTEN) changes PIP~2~ to PIP~3~ in contrast PI3K. PIP~3~ is a second mesenger to activate protein kinase B (AKT) which is a serine/threonine-specific protein kinase. AKT inhibits apoptosis and promote cell proliferation.  
 
-- Varing frquency of PIK3CA mutation across cancer types  
-  * High in endometrial breast  
-  * not common other cancer type
+Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in hormone receptor positive HER2 negative subtype. @andre_2019_alpelisib_nengljmeda The PIK3CA mutation is second most driver mutation after TP53. The PIK3CA mutation is most frequantly founded in endometrial carcinoma (45%), and followed by breast invasive carcinoma (24%), cervical squamous cell carcinoma and endocervical adenocarcinoma (20%) and colon adenocarcinoma (16%). 
 
-Universial prediction using gene expression data across cancer type for certain kind of mutation. It's clinically useless now, but we want to explore the possibilities of the PIK3CA mutation prediction.  
-
-- RNAseq can be widely used. The mutation status directly prediction
-
-- Previous study @way_2018_machine_cellreports
-
-- Prediction of aberant activation of a certain pathway vs a specific mutation 
-
-- The proposed solution  
-
-Prediction RAS pathway activation with gene expression data was done in previous study. @way_2018_machine_cellreports They trained pancancer The Cancer Genome Atlas (TCGA) data with a supervised elastic net penalized logistic regression classifier with stochastic gradient descent. The performance of their model was 84% with an area under the receiver operating characteristic (AUROC) curve and 63% with an area under the precision recall (AUPR) curve. We applied their modeling methods in prediction PIK3CA mutation.     
+Prediction RAS pathway activation with gene expression data was done in previous study. @way_2018_machine_cellreports They trained pancancer The Cancer Genome Atlas (TCGA) data with a supervised elastic net penalized logistic regression classifier with stochastic gradient descent. The performance of their model was 84% with an area under the receiver operating characteristic (AUROC) curve and 63% with an area under the precision recall (AUPR) curve. We applied their modeling methods in prediction PIK3CA mutation.  
 
 # Materials and Methods
 
@@ -54,7 +41,7 @@ Prediction RAS pathway activation with gene expression data was done in previous
 
 We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr rpackage.[@jacobsenCgdsrRbasedAPI2019] Gene expression data was get from GDAC firehose using RTCGAToolbox R package. [@samurRTCGAToolboxNewTool2014]    
  
-10845 cases were available both PIK3CA mutation and mRNAD expression data. 5128 out of 20502 genes were included in the modeling process after filtering with median absolute deviation as described at modelinf process method. 33 cancer type dummy variables were included in predictor variables. 
+10845 cases were available both PIK3CA mutation and mRNA expression data. 5128 out of 20502 genes were included in the modeling process after filtering with median absolute deviation as described at modelinf process method. 33 cancer type dummy variables were included in predictor variables. 
 
 The target variable was PIK3CA mutation status. The status of  PIK3CA was considered as positive when the case has following PIK3CA variants which is the target variables of the therascreen PIK3CA RGQ PCR Kit; C420R, E542K, E545A, E545D, E545G, E545K, Q546E, Q546R, H1047L, H1047R, H1047Y. The therascreen PIK3CA RGQ PCR Kit was approved by U.S. Food and Drug adminidtration for PIK3CA inhibitor. We splited the three quarters of dataset for the trainset and one quarter for testset. 
 
@@ -65,8 +52,7 @@ To narrow down potential predictors, Genes with a large the median absolute devi
 # Results
 
 ## Dataset summary 
-- PIK3CA prevalence
-- 
+Prevalcence of PIK3CA was 0.11 in all cases. The PIK3CA prevalance of each cancer type was vary. The median prevalence of PIK3CA of each cancer types  was 0.03 (range 0-0.33) (Figure 1).  
 
 ## Selecting model and performance estimation
 

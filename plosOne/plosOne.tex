@@ -235,9 +235,38 @@ Medicine, The Catholic University of Korea, Seoul, South Korea}}\textsuperscript
   \end{itemize}
 \end{itemize}
 
-Breast cancer with PIK3CA mutation has been approved to use PIK3CA
-inhibitor in hormone receptor positive HER2 negative subtype. {[}1{]}
-Prediction of PIK3CA mutation was done by gene expression data of TCGA.
+Targeted thrapy becomes standard treatment in many cancer patients. To
+treat with the targeted therapy, the The patients should be confirmed
+the indicated genomic alterations in their cancer. Many direct test for
+the genomic alteration has been developed and prooved for their clical
+utility to discriminate which patients will be response the targeted
+therapy.
+
+The machine learning approach has been actively researched recently to
+detect the genomic alterations. Breast cancer with PIK3CA mutation has
+been approved to use PIK3CA inhibitor in hormone receptor positive HER2
+negative subtype. {[}1{]}
+
+\begin{itemize}
+\tightlist
+\item
+  PIK3CA summary
+\end{itemize}
+
+PIK3CA is encodes the p110\(\alpha\) catalytic subunit of
+phosphatidylinositol 3′-kinase (PI3K). PI3K is a protein kinase which
+phosphorylates phosphatidylinositol 4,5-biphosphate
+(PIP\textsubscript{2}) to make phosphatidylinositol 3,4,5-triphosphate
+(PIP\_\{3\}). Phosphatase and tensin homolog (PTEN) changes PIP\_\{2\}
+to PIP\_\{3\} in contrast PI3K. PIP\_\{3\} is a second mesenger to
+activate protein kinase B (AKT) which is a serine/threonine-specific
+protein kinase. AKT inhibits apoptosis and promote cell proliferation.
+
+The PIK3CA mutation is second most driver mutation after TP53. the
+PIK3CA mutation is most frequantly founded in endometrial carcinoma
+(45\%), and followed by breast invasive carcinoma (24\%), cervical
+squamous cell carcinoma and endocervical adenocarcinoma (20\%) and colon
+adenocarcinoma (16\%).
 
 \begin{itemize}
 \tightlist
@@ -299,7 +328,7 @@ We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr
 rpackage.{[}3{]} Gene expression data was get from GDAC firehose using
 RTCGAToolbox R package. {[}4{]}
 
-10845 cases were available both PIK3CA mutation and mRNAD expression
+10845 cases were available both PIK3CA mutation and mRNA expression
 data. 5128 out of 20502 genes were included in the modeling process
 after filtering with median absolute deviation as described at modelinf
 process method. 33 cancer type dummy variables were included in
@@ -338,11 +367,9 @@ was done with tidymodels rpackage. {[}7{]}
 \hypertarget{dataset-summary}{%
 \subsection{Dataset summary}\label{dataset-summary}}
 
-\begin{itemize}
-\item
-  PIK3CA prevalence
-\item
-\end{itemize}
+Prevalcence of PIK3CA was 0.11 in all cases. The PIK3CA prevalance of
+each cancer type was vary. The median prevalence of PIK3CA of each
+cancer types was 0.03 (range 0-0.33) (Figure 1).
 
 \hypertarget{selecting-model-and-performance-estimation}{%
 \subsection{Selecting model and performance
