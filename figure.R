@@ -22,8 +22,8 @@ dataset %>%
   coord_flip() +
   theme_Publication() + 
   labs(title = "PIK3CA Prevalance",
-       x = "Prevalance",
-       y = "Cancer type") 
+       y = "Prevalance rate",
+       x = "Cancer type") 
 dev.off()
 ## Prevalence of PIK3CA 
 

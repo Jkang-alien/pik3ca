@@ -243,75 +243,33 @@ utility to discriminate which patients will be response the targeted
 therapy.
 
 The machine learning approach has been actively researched recently to
-detect the genomic alterations. Breast cancer with PIK3CA mutation has
-been approved to use PIK3CA inhibitor in hormone receptor positive HER2
-negative subtype. {[}1{]}
-
-\begin{itemize}
-\tightlist
-\item
-  PIK3CA summary
-\end{itemize}
+detect the genomic alterations. The machine learning can build a
+prediction model from a large number of predictors such as radiolomic
+features {[}1{]}, pathology image or gene expression data {[}2{]}. The
+machine learning approach has limitations to apply to clinical practice.
+However the machine learning prediction can be a second best when the
+direct test fails.
 
 PIK3CA is encodes the p110\(\alpha\) catalytic subunit of
 phosphatidylinositol 3′-kinase (PI3K). PI3K is a protein kinase which
 phosphorylates phosphatidylinositol 4,5-biphosphate
 (PIP\textsubscript{2}) to make phosphatidylinositol 3,4,5-triphosphate
-(PIP\_\{3\}). Phosphatase and tensin homolog (PTEN) changes PIP\_\{2\}
-to PIP\_\{3\} in contrast PI3K. PIP\_\{3\} is a second mesenger to
-activate protein kinase B (AKT) which is a serine/threonine-specific
-protein kinase. AKT inhibits apoptosis and promote cell proliferation.
+(PIP\textsubscript{3}). Phosphatase and tensin homolog (PTEN) changes
+PIP\textsubscript{2} to PIP\textsubscript{3} in contrast PI3K.
+PIP\textsubscript{3} is a second mesenger to activate protein kinase B
+(AKT) which is a serine/threonine-specific protein kinase. AKT inhibits
+apoptosis and promote cell proliferation.
 
-The PIK3CA mutation is second most driver mutation after TP53. the
+Breast cancer with PIK3CA mutation has been approved to use PIK3CA
+inhibitor in hormone receptor positive HER2 negative subtype. {[}3{]}
+The PIK3CA mutation is second most driver mutation after TP53. The
 PIK3CA mutation is most frequantly founded in endometrial carcinoma
 (45\%), and followed by breast invasive carcinoma (24\%), cervical
 squamous cell carcinoma and endocervical adenocarcinoma (20\%) and colon
 adenocarcinoma (16\%).
 
-\begin{itemize}
-\tightlist
-\item
-  Predicting mutation by gene expression data
-
-  \begin{itemize}
-  \tightlist
-  \item
-    What for?\\
-  \item
-    Feasible?\\
-  \item
-    Cost?
-  \end{itemize}
-\item
-  Varing frquency of PIK3CA mutation across cancer types
-
-  \begin{itemize}
-  \tightlist
-  \item
-    High in endometrial breast\\
-  \item
-    not common other cancer type
-  \end{itemize}
-\end{itemize}
-
-Universial prediction using gene expression data across cancer type for
-certain kind of mutation. It's clinically useless now, but we want to
-explore the possibilities of the PIK3CA mutation prediction.
-
-\begin{itemize}
-\item
-  RNAseq can be widely used. The mutation status directly prediction
-\item
-  Previous study {[}2{]}
-\item
-  Prediction of aberant activation of a certain pathway vs a specific
-  mutation
-\item
-  The proposed solution
-\end{itemize}
-
 Prediction RAS pathway activation with gene expression data was done in
-previous study. {[}2{]} They trained pancancer The Cancer Genome Atlas
+previous study. {[}4{]} They trained pancancer The Cancer Genome Atlas
 (TCGA) data with a supervised elastic net penalized logistic regression
 classifier with stochastic gradient descent. The performance of their
 model was 84\% with an area under the receiver operating characteristic
@@ -325,8 +283,8 @@ curve. We applied their modeling methods in prediction PIK3CA mutation.
 \subsection{Dataset}\label{dataset}}
 
 We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr
-rpackage.{[}3{]} Gene expression data was get from GDAC firehose using
-RTCGAToolbox R package. {[}4{]}
+rpackage.{[}5{]} Gene expression data was get from GDAC firehose using
+RTCGAToolbox R package. {[}6{]}
 
 10845 cases were available both PIK3CA mutation and mRNA expression
 data. 5128 out of 20502 genes were included in the modeling process
@@ -349,17 +307,17 @@ To narrow down potential predictors, Genes with a large the median
 absolute deviation (more than third-quartiles) were selected.
 Yeo-Johnson transformation was done to correct skewness. Centering and
 scaling were done. All preprocessing was done using recipe r package.
-{[}5{]} Penalized logistic regression was applied to prediction
+{[}7{]} Penalized logistic regression was applied to prediction
 modeling. 10-fold cross-validation with targe variable stratification
 was done over the hyperparameter grid: \(\lambda\) \{\(10^{-5}\),
 \(10^{-4}\),\(10^{-3}\),\(10^{-2}\),\(10^{-1}\), \(10^{0}\)\},
 \(\alpha\) \{0.0, 0.25, 0.5, 0.75\}. Lambda is penalty scaling parameter
 and alpha is mixing parameter of penalty function
 (\((1-\alpha)/2 \lVert\beta\rVert_2^2+\alpha\lVert \beta \rVert_1\)).
-{[}6{]} Model performance was evealuated with the area under receiver
+{[}8{]} Model performance was evealuated with the area under receiver
 operating characteristic (ROC) and area under the ROC (AUROC) and
 precision recall (PR) and area under curve (AUPR). The modelin process
-was done with tidymodels rpackage. {[}7{]}
+was done with tidymodels rpackage. {[}9{]}
 
 \hypertarget{results}{%
 \section{Results}\label{results}}
@@ -430,7 +388,7 @@ for gene expression data is neccessory to apply this prediction model.
 In this study, the prevalence of PIK3CA mutation was 11\%. The low
 prevalence of PIK3CA results in imbalaced dataset which makes the
 prediction difficult. The AUROC is optimistic in terms of performance.
-The AUPR is more informative than AUROC on imbalaced datasets. {[}8{]}
+The AUPR is more informative than AUROC on imbalaced datasets. {[}10{]}
 
 \begin{itemize}
 \item
@@ -460,7 +418,7 @@ The specific important mutations can effect stronger downsteam gene
 expression than the broad events pathway activation. The previous study
 might be more difficult prediction problum.
 
-OUr model includes cancer type predictor and they are stronger than gene
+Our model includes cancer type predictor and they are stronger than gene
 expression data. The varing prevalence of PIC3CA mutation across cancer
 type might reason of the strong cancer type predictor. If the cancer
 type was wrong or can not be determined, our model performance can be
@@ -480,9 +438,11 @@ poor.
 \section{Figure legends}\label{figure-legends}}
 
 \begin{itemize}
-\tightlist
 \item
-  Figure 1. Summary of modeling results
+  Figure 1. Prevalance rate of PIK3CA across cancer types The
+  abbreviations of cancer types are explained in S1 appendix.
+\item
+  Figure 2. Summary of modeling results
 \end{itemize}
 
 \begin{enumerate}
@@ -503,7 +463,7 @@ poor.
 \begin{itemize}
 \tightlist
 \item
-  Figure 2. Coefficients of model
+  Figure 3. Coefficients of model
 \end{itemize}
 
 \begin{enumerate}
@@ -511,7 +471,7 @@ poor.
 \tightlist
 \item
   Top 30 high coefficients of mRNA. (B) Coefficients of cancer types.
-  The abbreviations are explained in S1 appendix.
+  The abbreviations of cancer types are explained in S1 appendix.
 \end{enumerate}
 
 \hypertarget{supporting-information}{%
@@ -536,42 +496,55 @@ poor.
 \addcontentsline{toc}{section}{References}
 
 \hypertarget{refs}{}
+\leavevmode\hypertarget{ref-dercleIdentificationNonSmall2020}{}%
+1. Dercle L, Fronheiser M, Lu L, Du S, Hayes W, Leung DK, et al.
+Identification of NonSmall Cell Lung Cancer Sensitive to Systemic Cancer
+Therapies Using Radiomics. Clin Cancer Res. American Association for
+Cancer Research; 2020;26: 2151--2162.
+doi:\href{https://doi.org/10.1158/1078-0432.CCR-19-2942}{10.1158/1078-0432.CCR-19-2942}
+
+\leavevmode\hypertarget{ref-wayMachineLearningDetects2018}{}%
+2. Way GP, Sanchez-Vega F, La K, Armenia J, Chatila WK, Luna A, et al.
+Machine Learning Detects Pan-cancer Ras Pathway Activation in The Cancer
+Genome Atlas. Cell Reports. Elsevier; 2018;23: 172--180.e3.
+doi:\href{https://doi.org/10.1016/j.celrep.2018.03.046}{10.1016/j.celrep.2018.03.046}
+
 \leavevmode\hypertarget{ref-andre_2019_alpelisib_nengljmeda}{}%
-1. André F, Ciruelos E, Rubovszky G, Campone M, Loibl S, Rugo HS, et al.
+3. André F, Ciruelos E, Rubovszky G, Campone M, Loibl S, Rugo HS, et al.
 Alpelisib for PIK3CA-Mutated, Hormone ReceptorPositive Advanced Breast
 Cancer. New England Journal of Medicine. Massachusetts Medical Society;
 2019;380: 1929--1940.
 doi:\href{https://doi.org/10.1056/NEJMoa1813904}{10.1056/NEJMoa1813904}
 
 \leavevmode\hypertarget{ref-way_2018_machine_cellreports}{}%
-2. Way GP, Sanchez-Vega F, La K, Armenia J, Chatila WK, Luna A, et al.
+4. Way GP, Sanchez-Vega F, La K, Armenia J, Chatila WK, Luna A, et al.
 Machine Learning Detects Pan-cancer Ras Pathway Activation in The Cancer
 Genome Atlas. Cell Reports. Elsevier; 2018;23: 172--180.e3.
 doi:\href{https://doi.org/10.1016/j.celrep.2018.03.046}{10.1016/j.celrep.2018.03.046}
 
 \leavevmode\hypertarget{ref-jacobsenCgdsrRbasedAPI2019}{}%
-3. Jacobsen A, Luna A. Cgdsr: R-based API for accessing the MSKCC cancer
+5. Jacobsen A, Luna A. Cgdsr: R-based API for accessing the MSKCC cancer
 genomics data server (CGDS). 2019.
 
 \leavevmode\hypertarget{ref-samurRTCGAToolboxNewTool2014}{}%
-4. Samur MK. RTCGAToolbox: A new tool for exporting TCGA Firehose data.
+6. Samur MK. RTCGAToolbox: A new tool for exporting TCGA Firehose data.
 PLoS One. 2014;9(9):e106397.
 
 \leavevmode\hypertarget{ref-kuhnRecipesPreprocessingTools2020}{}%
-5. Kuhn M, Wickham H. Recipes: Preprocessing tools to create design
+7. Kuhn M, Wickham H. Recipes: Preprocessing tools to create design
 matrices. 2020.
 
 \leavevmode\hypertarget{ref-friedmanRegularizationPathsGeneralized2010}{}%
-6. Friedman J, Hastie T, Tibshirani R. Regularization Paths for
+8. Friedman J, Hastie T, Tibshirani R. Regularization Paths for
 Generalized Linear Models via Coordinate Descent. J Stat Softw. 2010;33:
 1--22.
 
 \leavevmode\hypertarget{ref-kuhnTidymodelsEasilyInstall2020}{}%
-7. Kuhn M, Wickham H. Tidymodels: Easily install and load the
+9. Kuhn M, Wickham H. Tidymodels: Easily install and load the
 'tidymodels' packages. 2020.
 
 \leavevmode\hypertarget{ref-saitoPrecisionRecallPlotMore2015}{}%
-8. Saito T, Rehmsmeier M. The Precision-Recall Plot Is More Informative
+10. Saito T, Rehmsmeier M. The Precision-Recall Plot Is More Informative
 than the ROC Plot When Evaluating Binary Classifiers on Imbalanced
 Datasets. PLOS ONE. Public Library of Science; 10: e0118432.
 doi:\href{https://doi.org/10.1371/journal.pone.0118432}{10.1371/journal.pone.0118432}
