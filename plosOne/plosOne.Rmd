@@ -6,7 +6,7 @@ author:
     affiliation: Department of Hospital Pathology, Seoul St. Mary’s Hospital, College of Medicine, The Catholic University of Korea, Seoul, South Korea
     corresponding: jkang.alien@gmail.com
 abstract: |
-bibliography: [mybibfile.bib, pik3ca.bib, rpackage.bib] 
+bibliography: [mybibfile.bib, pik3ca.bib, rpackage.bib, genes.bib] 
 indent: true
 output: rticles::plos_article
 csl: plos.csl
@@ -27,11 +27,11 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE)
   
 Targeted thrapy becomes standard treatment in many cancer patients. Many targeted therapy requires test for a specific cancer genomic alteration, to treat the patients. Many direct test for the genomic alteration has been developed and prooved for their clical utility to discriminate which patients will be response the targeted therapy. 
 
-Machine learning approach has been actively researched to detect the genomic alterations. Machine learning can build a prediction model from a large number of predictors such as radiolomic features @dercleIdentificationNonSmall2020, pathology image or gene expression data @wayMachineLearningDetects2018. Because most direct genomic test are more specific and sensitive than predictive models, machine learning approach might has limited role in clinical practice. However the machine learning prediction can be a second best when the direct test fails.   
+Machine learning approach has been actively researched to detect the genomic alterations. Machine learning can build a prediction model from a large number of predictors such as radiolomic features @dercleIdentificationNonSmall2020, pathology image [@coudrayClassificationMutationPrediction2018] or gene expression data [@wayMachineLearningDetects2018 @loiPIK3CAMutationsAssociated2010]. Because most direct genomic test are more specific and sensitive than predictive models, machine learning approach might has limited role in clinical practice. However the machine learning prediction can be a second best when the direct test fails.   
 
 Prediction RAS pathway activation with gene expression data was done in previous study. @way_2018_machine_cellreports They trained pancancer The Cancer Genome Atlas (TCGA) data with a supervised elastic net penalized logistic regression classifier with stochastic gradient descent. The performance of their model was 84% with an area under the receiver operating characteristic (AUROC) curve and 63% with an area under the precision recall (AUPR) curve. The authors suggested their approach can be applied to other genomic alterations.  
 
-PIK3CA is encodes the p110$\alpha$ catalytic subunit of phosphatidylinositol 3′-kinase (PI3K). PI3K is a protein kinase which phosphorylates phosphatidylinositol 4,5-biphosphate (PIP~2~) to make phosphatidylinositol 3,4,5-triphosphate (PIP~3~). Phosphatase and tensin homolog (PTEN) changes PIP~2~ to PIP~3~ in contrast PI3K. PIP~3~ is a second mesenger to activate protein kinase B (AKT) which is a serine/threonine-specific protein kinase. AKT inhibits apoptosis and promote cell proliferation.  
+PIK3CA is encodes the p110$\alpha$ catalytic subunit of phosphatidylinositol 3′-kinase (PI3K). PI3K is a protein kinase which phosphorylates phosphatidylinositol 4,5-biphosphate (PIP~2~) to make phosphatidylinositol 3,4,5-triphosphate (PIP~3~). Phosphatase and tensin homolog (PTEN) changes PIP~2~ to PIP~3~ in contrast PI3K. PIP~3~ is a second mesenger to activate protein kinase B (AKT) which is a serine/threonine-specific protein kinase. AKT inhibits apoptosis and promote cell proliferation. @cantleyPhosphoinositide3KinasePathway2002    
 
 Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in hormone receptor positive HER2 negative subtype. @andre_2019_alpelisib_nengljmeda The PIK3CA mutation is second most driver mutation after TP53. The PIK3CA mutation is most frequantly founded in endometrial carcinoma (45%), and followed by breast invasive carcinoma (24%), cervical squamous cell carcinoma and endocervical adenocarcinoma (20%) and colon adenocarcinoma (16%). 
 
@@ -42,7 +42,7 @@ We apply a supervised elastic net penalized logistic regression model in predict
 
 ## Dataset
 
-We used TCGA pancancer dataset. PIK3CA mutation data was get using cgdsr rpackage.[@jacobsenCgdsrRbasedAPI2019] Gene expression data was get from GDAC firehose using RTCGAToolbox R package. [@samurRTCGAToolboxNewTool2014]    
+We used TCGA pancancer dataset. TCGA is a cancer genomic consotium that archives data of exom sequencing, gene expression, DNA methylation, protein expression and clicial data of more than 10000 cancer samples across 33 common cancer types. The gene expression TCGA pancancer dataset is batch-corrected with normalization. TCGA dataset is publically available. PIK3CA mutation data was get using cgdsr rpackage.[@jacobsenCgdsrRbasedAPI2019] Gene expression data was get from GDAC firehose using RTCGAToolbox R package. [@samurRTCGAToolboxNewTool2014]    
  
 10845 cases were available both PIK3CA mutation and mRNA expression data. 5128 out of 20502 genes were included in the modeling process after filtering with median absolute deviation as described at modeling process method. 33 cancer type dummy variables were included in predictor variables. 
 
@@ -50,12 +50,16 @@ The target variable was PIK3CA mutation status. The status of  PIK3CA was consid
 
 ## Modeling process  
 
-To narrow down potential predictors, Genes with a large the median absolute deviation (more than third-quartiles) were selected.  Yeo-Johnson transformation was done to correct skewness. Centering and scaling were done. All preprocessing was done using recipe r package. [@kuhnRecipesPreprocessingTools2020] Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid: $\lambda$ {$10^{-5}$, $10^{-4}$,$10^{-3}$,$10^{-2}$,$10^{-1}$, $10^{0}$}, $\alpha$ {0.0, 0.25, 0.5, 0.75}. Lambda is  penalty scaling parameter and alpha is mixing parameter of penalty function ($(1-\alpha)/2 \lVert\beta\rVert_2^2+\alpha\lVert \beta \rVert_1$). [@friedmanRegularizationPathsGeneralized2010] Model performance was evealuated with the area under receiver operating characteristic (ROC) and area under the ROC (AUROC) and precision recall (PR) and area under curve (AUPR). The modelin process was done with tidymodels rpackage.  [@kuhnTidymodelsEasilyInstall2020]   
+To narrow down potential predictors, Genes with a large the median absolute deviation (more than third-quartiles) were selected.  Yeo-Johnson transformation was done to correct skewness. Centering and scaling were done. All preprocessing was done using recipe r package. [@kuhnRecipesPreprocessingTools2020] Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid: $\lambda$ {$10^{-5}$, $10^{-4}$,$10^{-3}$,$10^{-2}$,$10^{-1}$, $10^{0}$}, $\alpha$ {0.0, 0.25, 0.5, 0.75}. Lambda is  penalty scaling parameter and alpha is mixing parameter of penalty function ($(1-\alpha)/2 \lVert\beta\rVert_2^2+\alpha\lVert \beta \rVert_1$). [@friedmanRegularizationPathsGeneralized2010]  
+
+## Accessing model performance  
+
+Model performance was evealuated with the area under receiver operating characteristic (ROC) and area under the ROC (AUROC) and precision recall (PR) and area under curve (AUPR). The prevalence of PIK3CA mutation is low. The low prevalence of PIK3CA results in imbalaced dataset which makes the prediction difficult. The AUROC is optimistic in terms of performance. The AUPR is more informative than AUROC on imbalaced datasets. [@saitoPrecisionRecallPlotMore2015]   The modeling process was done with tidymodels rpackage.  [@kuhnTidymodelsEasilyInstall2020]   
 
 # Results
 
 ## prevalance rate rate of PIK3CA mutation   
-prevalance rate rate of PIK3CA was 0.11 in all cases. The PIK3CA prevalance rate of each cancer type was vary. The median prevalence of PIK3CA of each cancer types  was 0.03 (range 0-0.33) (Figure 1).  
+Prevalance rate of PIK3CA was 0.11 in all cases. The PIK3CA prevalance rate of each cancer type was vary. The median prevalance rate of PIK3CA of each cancer types  was 0.03 (range 0-0.33) (Figure 1).  
 
 ## Selecting model and performance estimation
 
@@ -79,9 +83,7 @@ Our model showed good performance to predict PIK3CA mutation of various cancer t
 
 - Critical assessment opinions on any shortcomings in study design  
 
-In this study, the split method was done for testset instead of indepedent testset. Because there is no standard analysis method for the RNA-seq gene expression quantification, it is difficult to find gene expression data same as TGCA data. Developing standard analysis method for gene expression data is neccessory to apply this prediction model.  
-
-In this study, the prevalence of PIK3CA mutation was 11%. The low prevalence of PIK3CA results in imbalaced dataset which makes the prediction difficult. The AUROC is optimistic in terms of performance. The AUPR is more informative than AUROC on imbalaced datasets. [@saitoPrecisionRecallPlotMore2015]  
+Prediction modeling from TCGA pancancer dataset has limitations regarding to data preprocessing. Methods for gancer gene expression has been developed for research. To stastical analysis, the gene expression data is processed between-sample normalization to remove batch effect. If the model has been trained from the between-sample normalization, a new sample can not be exactly processed like trainset. A model based on gene expression TCGA pancacner dataset has limitation on preprocessing. It is nessessory developing preprocessing method which is independent with dataset to apply the gene expression data to prediction model.
 
 - limitations in methods
 
@@ -92,11 +94,25 @@ In this study, the prevalence of PIK3CA mutation was 11%. The low prevalence of 
 - Comparison with other studies where inconsistencies are discussed  
 - Evaluate the results - not the authors
 
-Our PIK3CA prediction model performed better than RAS activation prediction model of previous study in terms of both AUROC (0.84 vs 0.75) and AUPR (0.39 vs 0.24) on testset prediction. Our testset is corresponding to the samples initially filtered from training. The target variable of our study is more specific than the previous study. The specific important mutations can effect stronger downsteam gene expression than the broad events pathway activation. The previous study might be more difficult prediction problum. 
+Our PIK3CA prediction model performed better than RAS activation prediction model of previous study in terms of both AUROC (0.84 vs 0.75) and AUPR (0.39 vs 0.24) on testset prediction. Our testset is corresponding to the samples initially filtered from training. The target variable of our study is more specific than the previous study. The specific important mutations can effect stronger downsteam gene expression than the broad events pathway activation. The previous study might be more difficult prediction problem. 
 
 Our model includes cancer type predictor and they are stronger than gene expression data. The varing prevalence of PIC3CA mutation across cancer type might reason of the strong cancer type predictor. If the cancer type was wrong or can not be determined, our model performance can be poor.  
-  
+
+Some significant gene expression predictors were closely related with PTEN and the PI3K pathway. PTEN and IGFR1R are the strongest gene expression predictor which have negative and positive predictive power. IGF1R is a tyrosine kinase receptor which activates PI3K. [@leroithInsulinlikeGrowthFactor2003] Insulin receptor substrate-2 (IRS2) is the adaptor protein of IGF1R. [@heInteractionInsulinReceptor1996] PTEN is an important regulator of PIP~3~ by dephosphorylating  PIP~3~ in constrast PI3K.[@cantleyPhosphoinositide3KinasePathway2002]  
+
+Another study of PIK3CA mutation prediction showed good performance AUROC 0.71 in independent testset. They made gene-expression signature which is sum of the average of the logarithmic gene expression. [@cizkovaGeneExpressionProfiling2010; @loiPIK3CAMutationsAssociated2010]  
+
+Another study predicted copy numbear alterations with gene expression using multinomial logistic regression model with least absolute shrinkage and selection operator (LASSO). The prediction of 1p/19q codel was very good with an AUROC of 0.997. The gene level prediction was good with an AUROC 0.75. [@muCNAPEMachineLearning2019]
+
+A Hidden Markov Model Approach for Prediction of Genomic Alterations from Gene Expression Profiling.[@gengHiddenMarkovModel2008]  
+
+[@heGeneSignaturesAssociated2020]
+
+ 
+
+
 - Conclusions comments on possible biological or clinical implications and suggestions for further research.  
+
 
 - Proof of concept study  
 - Reproducibility of gene expression prediction model  

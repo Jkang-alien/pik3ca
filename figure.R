@@ -100,15 +100,15 @@ mutationPR <- mutatioPlotPRTest +
 
 geneCoeff <- coeffPlot +
   labs(title = "Coefficiency of genes",
-       x = "Coefficiency",
-       y = "Gene") +
+       y = "Coefficiency",
+       x = "Gene") +
   scale_colour_Publication() +
   theme_Publication()
 
 typeCoeff <- typePlot +
   labs(title = "Coefficiency of cancer type",
-       x = "Coefficiency",
-       y = "Cancer type") +
+       y = "Coefficiency",
+       x = "Cancer type") +
   scale_colour_Publication() +
   theme_Publication()
 
