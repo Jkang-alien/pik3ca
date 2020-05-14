@@ -16,27 +16,27 @@ dataset %>%
   count(variant) %>%
   spread(variant, n) %>%
   replace_na(list(Mutant=0)) %>%
-  mutate(prevalance = Mutant/(Mutant + Wild)) %>%
-  ggplot(aes(x=reorder(type, -prevalance), y=prevalance)) +
+  mutate(prevalence = Mutant/(Mutant + Wild)) %>%
+  ggplot(aes(x=reorder(type, -prevalence), y=prevalence)) +
   geom_bar(stat = "identity") +
   coord_flip() +
   theme_Publication() + 
-  labs(title = "PIK3CA Prevalance",
-       y = "Prevalance rate",
+  labs(title = "PIK3CA prevalence",
+       y = "Prevalence rate",
        x = "Cancer type") 
 dev.off()
 ## Prevalence of PIK3CA 
 
 
-dfPrevalance <- dataset %>%
+dfprevalence <- dataset %>%
   select(variant, type) %>%
   group_by(type) %>%
   count(variant) %>%
   spread(variant, n) %>%
   replace_na(list(Mutant=0)) %>%
-  mutate(prevalance = Mutant/(Mutant + Wild))
+  mutate(prevalence = Mutant/(Mutant + Wild))
 
-summary(dfPrevalance$prevalance)
+summary(dfprevalence$prevalence)
 summary(dataset$variant)
 ### ROC PR Plots
   
@@ -99,15 +99,15 @@ mutationPR <- mutatioPlotPRTest +
   theme_Publication()
 
 geneCoeff <- coeffPlot +
-  labs(title = "Coefficiency of genes",
-       y = "Coefficiency",
+  labs(title = "Coefficient of genes",
+       y = "Coefficient",
        x = "Gene") +
   scale_colour_Publication() +
   theme_Publication()
 
 typeCoeff <- typePlot +
-  labs(title = "Coefficiency of cancer type",
-       y = "Coefficiency",
+  labs(title = "Coefficient of cancer type",
+       y = "Coefficient",
        x = "Cancer type") +
   scale_colour_Publication() +
   theme_Publication()
@@ -130,8 +130,8 @@ dev.off()
 
 
 typePlot +
-  labs(title = "Coefficiency of cancer type",
-       x = "Coefficiency",
+  labs(title = "Coefficient of cancer type",
+       x = "Coefficient",
        y = "Cancer type") +
   scale_colour_Publication() +
   theme_Publication()
