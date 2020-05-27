@@ -1,22 +1,22 @@
 ---
-title: Prediction of PIK3CA mutation with gene expression
+title: Prediction of PIK3CA mutation with gene expression in cancer
 author:
   - name: Jun Kang
     email: jkang.alien@gmail.com
-    affiliation: Department of Hospital Pathology, Seoul St. Mary’s Hospital, College of Medicine, The Catholic University of Korea, Seoul, South Korea
-
+    affiliation: Department of Hospital Pathology, Seoul St. Mary’s Hospital
   - name: Ahwon Lee
     email: klee@catholic.ac.kr
-    affiliation: Department of Hospital Pathology, Seoul St. Mary’s Hospital, College of Medicine, The Catholic University of Korea, Seoul, South Korea
-
+    affiliation: Department of Hospital Pathology, Seoul St. Mary’s Hospital
   - name: Youn Soo Lee
     email: lys9908@catholic.ac.kr
-    affiliation: Department of Hospital Pathology, Seoul St. Mary’s Hospital, College of Medicine, The Catholic University of Korea, Seoul, South Korea
+    affiliation: Department of Hospital Pathology, Seoul St. Mary’s Hospital
     corresponding: lys9908@catholic.ac.kr
-    
-    
+address:
+  - code: Department of Hospital Pathology, Seoul St. Mary’s Hospital
+    address: Department of Hospital Pathology, Seoul St. Mary’s Hospital, College of Medicine, The Catholic University of Korea, Seoul, South Korea
+
 abstract: | 
-  Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in hormone receptor-positive HER2 negative subtype. We apply a supervised elastic net penalized logistic regression model in prediction PIK3CA mutation from gene expression data. We used the TCGA pan-cancer dataset. Penalized logistic regression was applied to prediction modeling. 10-fold cross-validation with targe variable stratification was done over the hyperparameter grid. 10845 cases were available for both PIK3CA mutation and mRNA expression data. In 10-fold cross-validation, the model with $\lambda$ = 0.01 and $\alpha$ = 1.0 (Ridge regression) showed best performance in terms of AUROC. The final model was trained with the selected hyperparameters with the entire trainset. The trainset AUROC was 0.93 and the testset AUROC was 0.84. The AUPR of trainset was 0.66 and the testset AUPR was 0.39. Both IGFR1R and PTEN are key players in the tyrosine kinase pathway. The cancer type was an important predictor. Our study suggests that the prediction of genomic alteration with gene expression data is possible with good performance.
+  Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in hormone receptor-positive HER2 negative subtype. We apply a supervised elastic net penalized logistic regression model in prediction PIK3CA mutation from gene expression data. Penalized logistic regression was applied to prediction modeling using the TCGA pan-cancer dataset. 10845 cases were available for both PIK3CA mutation and mRNA expression data. In 10-fold cross-validation, the model with $\lambda$ = 0.01 and $\alpha$ = 1.0 (Ridge regression) showed best performance in terms of AUROC. The final model was trained with the selected hyperparameters with the entire trainset. The trainset AUROC was 0.93 and the testset AUROC was 0.84. The AUPR of trainset was 0.66 and the testset AUPR was 0.39. The cancer types were the most important predictors. Both IGFR1R and PTEN were most important among gene expression predictors. Our study suggests that the prediction of genomic alteration with gene expression data is possible with good performance.
 
 
 bibliography: [mybibfile.bib, pik3ca.bib, rpackage.bib, genes.bib] 
@@ -32,26 +32,25 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 
 # Introduction
 
-Targeted therapy becomes a standard treatment in many cancer patients. Much targeted therapy requires a test for a specific cancer genomic alteration, to treat the patients. Many direct tests for the genomic alteration have been developed and prooved for their clinical utility to find which patients will be responding to the targeted therapy. 
+Targeted therapy becomes a standard treatment in many cancer patients. The majority of targeted therapy requires a test for a specific cancer genomic alteration, to treat the patients. Many direct tests for the genomic alteration have been developed and prooved for their clinical utility to find which patients will be responding to the targeted therapy. 
 
-It has been actively researched that the machine learnig approach can be applied to detect genomic alterations. Machine learning algorithm can build a prediction model from a large number of predictors such as radiolomic features @dercleIdentificationNonSmall2020, pathology image [@coudrayClassificationMutationPrediction2018] or gene expression data [@wayMachineLearningDetects2018 @loiPIK3CAMutationsAssociated2010]. Because the most direct genomic test is more specific and sensitive than predictive models, the machine learning approach might have a limited role in clinical practice. However, the machine learning prediction can be a second-best when the direct test fails.   
+It has been actively researched that the machine learnig approach can be applied to detect genomic alterations. Machine learning algorithm can build a prediction model from a large number of predictors such as radiolomic features @dercleIdentificationNonSmall2020, pathology image [@coudrayClassificationMutationPrediction2018] or gene expression data [@wayMachineLearningDetects2018 @loiPIK3CAMutationsAssociated2010]. Because the most direct genomic test is more specific and sensitive than predictive models, the machine learning approach might have a limited role in clinical practice. However, the machine learning prediction can be a second-best when the direct test fails.  
 
-Prediction RAS pathway activation with gene expression data was done in the previous study. @way_2018_machine_cellreports They trained pan-cancer The Cancer Genome Atlas (TCGA) data with a supervised elastic net penalized logistic regression classifier with stochastic gradient descent. The performance of their model was 84% with an area under the receiver operating characteristic (AUROC) curve and 63% with an area under the precision-recall (AUPR) curve. The authors suggested their approach can be applied to other genomic alterations.  
-
-PIK3CA encodes the p110$\alpha$ catalytic subunit of phosphatidylinositol 3′-kinase (PI3K). PI3K is a protein kinase that phosphorylates phosphatidylinositol 4,5-biphosphate (PIP~2~) to make phosphatidylinositol 3,4,5-triphosphate (PIP~3~). Phosphatase and tensin homolog (PTEN) changes PIP~2~ to PIP~3~ in contrast, PI3K. PIP~3~ is a second messenger to activate protein kinase B (AKT) which is a serine/threonine-specific protein kinase. AKT inhibits apoptosis and promotes cell proliferation. @cantleyPhosphoinositide3KinasePathway2002    
+Prediction of RAS pathway activation with gene expression data was done in the previous study. @way_2018_machine_cellreports They trained pan-cancer The Cancer Genome Atlas (TCGA) data with a supervised elastic net penalized logistic regression classifier with stochastic gradient descent. The performance of their model was 84% with an area under the receiver operating characteristic (AUROC) curve and 63% with an area under the precision-recall (AUPR) curve. The authors suggested their approach can be applied to other genomic alterations.  
 
 Breast cancer with PIK3CA mutation has been approved to use PIK3CA inhibitor in hormone receptor-positive HER2 negative subtype. @andre_2019_alpelisib_nengljmeda The PIK3CA mutation is the second most driver mutation after TP53. The PIK3CA mutation is most frequently founded in endometrial carcinoma (45%), and followed by breast invasive carcinoma (24%), cervical squamous cell carcinoma, and endocervical adenocarcinoma (20%) and colon adenocarcinoma (16%). 
 
-We apply a supervised elastic net penalized logistic regression model in prediction PIK3CA mutation. The purpose of this study is to know this prediction model approach can be applied not only to RAS pathway activation but also PIK3CA mutation across many cancer types.  
+PIK3CA encodes the p110$\alpha$ catalytic subunit of phosphatidylinositol 3′-kinase (PI3K). PI3K is a protein kinase that phosphorylates phosphatidylinositol 4,5-biphosphate (PIP~2~) to make phosphatidylinositol 3,4,5-triphosphate (PIP~3~). Phosphatase and tensin homolog (PTEN) changes PIP~2~ to PIP~3~ in contrast, PI3K. PIP~3~ is a second messenger to activate protein kinase B (AKT) which is a serine/threonine-specific protein kinase. AKT inhibits apoptosis and promotes cell proliferation. @cantleyPhosphoinositide3KinasePathway2002    
+
+We apply a supervised elastic net penalized logistic regression model in prediction PIK3CA mutation. The purpose of this study is to know whether this prediction model approach can be applied not only to RAS pathway activation but also PIK3CA mutation across many cancer types.  
 
 # Materials and Methods
 
 ## Dataset
 
-We used the TCGA pan-cancer dataset. TCGA is a cancer genomic consortium that archives data of exome sequencing, gene expression, DNA methylation, protein expression, and clinical data of more than 10000 cancer samples across 33 common cancer types. The gene expression TCGA pan-cancer dataset is batch-corrected with normalization. The TCGA dataset is publically available. PIK3CA mutation data was got using cgdsr rpackage.[@jacobsenCgdsrRbasedAPI2019] Gene expression data was downloaded from the National Cancer Institute (NCI)'s Genomic Data Commons (GDC) website that archives data used for The Pan-Cancer Atlas initiative. (https://gdc.cancer.gov/about-data/publications/pancanatlas)    
- 
+We used the TCGA pan-cancer dataset. TCGA is a cancer genomic consortium that archives data of exome sequencing, gene expression, DNA methylation, protein expression, and clinical data of more than 10000 cancer samples across 33 common cancer types. The TCGA dataset is publically available. PIK3CA mutation data was got using cgdsr rpackage.[@jacobsenCgdsrRbasedAPI2019] Gene expression data was downloaded from the National Cancer Institute (NCI)'s Genomic Data Commons (GDC) website that archives data used for The Pan-Cancer Atlas initiative. (https://gdc.cancer.gov/about-data/publications/pancanatlas) The gene expression TCGA pan-cancer dataset is batch-corrected with normalization.  
 
-The target variable was the PIK3CA mutation status. The status of  PIK3CA was considered as positive when the case has following PIK3CA variants which are the target variables of the therascreen PIK3CA RGQ PCR Kit; C420R, E542K, E545A, E545D, E545G, E545K, Q546E, Q546R, H1047L, H1047R, H1047Y. The therascreen PIK3CA RGQ PCR Kit was approved as a companion diagnostics to treat with PIK3CA inhibitor by the U.S. Food and Drug Administration. We split the three-quarters of the dataset for the trainset and one quarter for the test set. 
+The target variable was the PIK3CA mutation status. The status of  PIK3CA was considered as positive when the case has following PIK3CA variants which are the target variants of the therascreen PIK3CA RGQ PCR Kit; C420R, E542K, E545A, E545D, E545G, E545K, Q546E, Q546R, H1047L, H1047R, H1047Y. The therascreen PIK3CA RGQ PCR Kit was approved as a companion diagnostics to treat with PIK3CA inhibitor by the U.S. Food and Drug Administration. We split the three-quarters of the dataset for the trainset and one quarter for the test set.  
 
 ## Modeling process  
 
@@ -59,7 +58,7 @@ To narrow down potential predictors, genes with a large the median absolute devi
 
 ## Accessing model performance  
 
-Model performance was evaluated with the area under the receiver operating characteristic (ROC) and area under the ROC (AUROC) and precision-recall (PR) and area under the curve (AUPR). The AUPR is more informative than AUROC on imbalanced datasets. [@saitoPrecisionRecallPlotMore2015] The modeling process and accessing model performance were done with tidymodels rpackage.  [@kuhnTidymodelsEasilyInstall2020]  
+Model performance was evaluated with the AUROC curve and the AUPR curve. The AUPR is more informative than AUROC on imbalanced datasets. [@saitoPrecisionRecallPlotMore2015] The modeling process and accessing model performance were done with tidymodels rpackage.  [@kuhnTidymodelsEasilyInstall2020]  
 
 # Results
 
@@ -77,19 +76,19 @@ Because the prevalence of PIK3CA mutation varies across the cancer type, the per
 
 ## Important predictors  
 
-Figure 3 shows the top 30 important predictors. The coefficient is the parameter of the predictor which represents the effect of the predictor on prediction. IGF1R mRNA expression was the strongest negative predictor and PTEN was the strongest positive predictor. Both IGFR1R and PTEN are key players in the tyrosine kinase pathway. The cancer type was an important predictor. Some cancer types including uterine carcinosarcoma (UCS), bladder urothelial carcinoma (BLCA), pancreatic adenocarcinoma (PAAD), lymphoid neoplasm diffuse large B-cell lymphoma (DLBC) are the strongest predictors. 
+Figure 3 shows the top 30 important predictors. The coefficient is the parameter of the predictor which represents the effect of the predictor on prediction. IGF1R mRNA expression was the strongest negative predictor and PTEN was the strongest positive predictor. Both IGFR1R and PTEN are key players in the tyrosine kinase pathway. The cancer types were important predictors. Some cancer types including uterine carcinosarcoma (UCS), bladder urothelial carcinoma (BLCA), pancreatic adenocarcinoma (PAAD), lymphoid neoplasm diffuse large B-cell lymphoma (DLBC) are the strongest predictors. 
 
 # Discussion
 
 Our model showed good performance to predict the PIK3CA mutation of various cancer types. This result suggests that the supervised elastic net penalized logistic regression model can be applied not only to the RAS activation pathway but also other genomic alterations. Both the RAS activation pathway and PIK3CA mutation are important and common cancer genomic alterations. They have a significant effect on gene expression in cancer cells. It can not be generalized that the supervised elastic net penalized logistic regression model can be applied to other genomic alteration. It might be a challenging prediction of genomic alterations that are infrequent or have a weak effect on gene expression.  
 
-Prediction modeling from the TCGA pan-cancer dataset has limitations regarding data preprocessing. Methods for cancer gene expression have been developed for research. The gene expression data is processed between-sample normalization to remove the batch effect. If the model has been trained from the between-sample normalization, a new sample can not be exactly preprocessed with normalization which was done on trainset. A model based on gene expression TCGA pan-cancer dataset has a limitation on data preprocessing. It is necessary for developing a preprocessing method that is independent with a dataset to apply the gene expression data to the prediction model.
+Prediction modeling from the TCGA pan-cancer dataset has limitations regarding data preprocessing. The gene expression data is processed between-sample normalization to remove the batch effect. If the model has been trained from the between-sample normalization, a new sample can not be exactly preprocessed with normalization which was done on trainset. A model based on gene expression TCGA pan-cancer dataset has a limitation on data preprocessing. It is necessary for developing a preprocessing method that is independent with a dataset to apply the gene expression data to the prediction model.
 
 Our PIK3CA prediction model performed similar with the RAS activation prediction model of the previous study in terms of AUROC (0.84). However AUPR of our model for PIK3CA is lower than model for RAS activation (0.39 vs 0.63). The reason of lower AUPR of our model can be explained by low prevalence rate of PIK3CA mutation and imbalanced dataset. The model for RAS activation trained with cancer types with more than 0.05 prevalence of RAS activation to avoid imbalance classification problem. We included all cancer types into modeling process. The lower prevalance rate of target variable mean our dataset has a lower baseline of AUPR. In the subanalysis for performance of each cancer types, the cancer types with higher PIK3CA mutation rate showe better AUPR.  
 
-Our model includes cancer type predictor and they are stronger than gene expression data. The varying prevalence of PIC3CA mutation across cancer type might reason for the strong cancer type predictor. If the cancer type was wrong or can not be determined, our model performance can be poor.  
+Our model includes cancer type as predictors and they are stronger predictors than gene expression. The varying prevalence of PIC3CA mutation across cancer type might reason for the strong predictive power of cancer type. If the cancer type was wrong or can not be determined, our model performance can be poor.  
 
-Some significant gene expression predictors were closely related to PTEN and the PI3K pathway. PTEN and IGFR1R are the strongest gene expression predictor which have negative and positive predictive power. IGF1R is a tyrosine kinase receptor that activates PI3K. [@leroithInsulinlikeGrowthFactor2003] Insulin receptor substrate-2 (IRS2) is the adaptor protein of IGF1R. [@heInteractionInsulinReceptor1996] PTEN is an important regulator of PIP~3~ by dephosphorylating  PIP~3~ in contrast PI3K.[@cantleyPhosphoinositide3KinasePathway2002]  
+Some significant gene expression predictors were closely related to PTEN and the PI3K pathway. PTEN and IGFR1R are the strongest gene expression predictor which have negative and positive predictive power. IGF1R is a tyrosine kinase receptor that activates PI3K. [@leroithInsulinlikeGrowthFactor2003] PTEN is an important regulator of PIP~3~ by dephosphorylating  PIP~3~ in contrast PI3K.[@cantleyPhosphoinositide3KinasePathway2002]  
 
 There is some study trying to predict genomic alterations from gene expression data. A study performed PIK3CA mutation prediction by a gene-expression signature which is a sum of the average of the logarithmic gene expression. The model showed good performance AUROC 0.71 in an independent test set. [@cizkovaGeneExpressionProfiling2010; @loiPIK3CAMutationsAssociated2010] Another study predicted copy number alterations with gene expression using a multinomial logistic regression model with least absolute shrinkage and selection operator (LASSO). The prediction of the 1p/19q codel was very good with an AUROC of 0.997. The gene-level prediction was good with an AUROC 0.75. [@muCNAPEMachineLearning2019] A Hidden Markov Model Approach for Prediction of Genomic Alterations from Gene Expression Profiling.[@gengHiddenMarkovModel2008] A logistic regression model was used for MYCN gene amplification in neuroblastoma. [@heGeneSignaturesAssociated2020]
 
@@ -97,12 +96,12 @@ Our study suggests that the prediction of genomic alteration with gene expressio
 
 # Figure legends 
 
-- Figure 1. prevalence rate of PIK3CA across cancer types
+- Figure 1. Prevalence rate of PIK3CA across cancer types.
 The abbreviations of cancer types are explained in the S1 Appendix.
 
 - Figure 2. Summary of modeling results  
 
-(A) Left: receiver operating characteristic (ROC) curve right: precision-recall (PR) curve of trainset and test set. The horizontal green line is the PIK3CA mutation rate (0.11)  (B) Correlation between trainset and test set of the area under the receiver operating characteristic curve (AUROC) and area under the precision-recall curve (AUPR) among cancer type. The gray band is 95% confidence interval. The abbreviations are explained in the S1 Appendix. (C) Correlation between the PIK3CA mutation rate of area under the receiver operating characteristic curve (AUROC) and area under the precision-recall curve (AUPR).   
+(A) Left: receiver operating characteristic (ROC) curve. right: precision-recall (PR) curve of trainset and test set. The horizontal green line is the PIK3CA mutation rate (0.11)  (B) Correlation between trainset and test set of the area under the receiver operating characteristic curve (AUROC) and the area under the precision-recall curve (AUPR) among cancer type. The gray band is 95% confidence interval. The abbreviations are explained in the S1 Appendix. (C) Correlation between the PIK3CA mutation rate of the AUROC and the AUPR.   
 
 - Figure 3. Coefficients of model  
 
