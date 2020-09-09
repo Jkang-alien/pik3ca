@@ -10,7 +10,30 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```{r TCGA abbreviations}
 library(tidyverse)
 
-read_delim("../TCGAAbbreviations.txt", delim = "\t") %>%
+read_delim(here::here("TCGAAbbreviations.txt"), delim = "\t") %>%
   knitr::kable()
+
+```
+
+```{r select model}
+
+library(tidymodels)
+library(latex2exp)
+
+load(here::here("glmn_tune_pancancer.RData"))
+
+roc_vals <- 
+  collect_metrics(glmn_tune) %>% 
+  filter(.metric == "roc_auc")
+roc_vals %>% 
+  mutate(mixture = format(mixture)) %>% 
+  ggplot(aes(x = penalty, y = mean, col = mixture)) + 
+  geom_line() + 
+  geom_point() + 
+  geom_errorbar(aes(ymin = mean - std_err, ymax = mean + std_err, width = 0.05)) +
+  scale_x_log10() +
+  xlab(TeX("Penalty ($\\lambda$)")) +
+  ylab("Area under the receiver operating characteristic (AUROC)") +
+  labs(color = TeX("Mixture ($\\alpha$)"))
 
 ```

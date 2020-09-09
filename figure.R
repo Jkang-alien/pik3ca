@@ -135,3 +135,27 @@ typePlot +
        y = "Cancer type") +
   scale_colour_Publication() +
   theme_Publication()
+library(tidyverse)
+library(tidymodels)
+library(latex2exp)
+library(Cairo)
+
+load(here::here("glmn_tune_pancancer.RData"))
+
+roc_vals <- 
+  collect_metrics(glmn_tune) %>% 
+  filter(.metric == "roc_auc")
+
+CairoPDF(file = 'S1Figure.pdf',
+         width = 5, height = 5, pointsize=10)
+roc_vals %>% 
+  mutate(mixture = format(mixture)) %>% 
+  ggplot(aes(x = penalty, y = mean, col = mixture)) + 
+  geom_line() + 
+  geom_point() + 
+  geom_errorbar(aes(ymin = mean - std_err, ymax = mean + std_err, width = 0.05)) +
+  scale_x_log10() +
+  xlab(TeX("Penalty ($\\lambda$)")) +
+  ylab("Area under the receiver operating characteristic (AUROC)") +
+  labs(color = TeX("Mixture ($\\alpha$)"))
+dev.off()
